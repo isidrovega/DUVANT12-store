@@ -5060,3 +5060,14 @@ body {
       14px;
   }
 }
+/* =========================================================
+   FIX — MODAL CHECKOUT OCULTO
+========================================================= */
+
+.checkout-ready-overlay[hidden] {
+  display: none !important;
+}
+
+.checkout-ready-overlay:not([hidden]) {
+  display: flex;
+}
