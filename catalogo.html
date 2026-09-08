@@ -1,0 +1,1186 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
+  >
+
+  <meta
+    name="description"
+    content="Catálogo de perfumes DUVANT 12."
+  >
+
+  <title>Perfumes | DUVANT 12</title>
+
+  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="store-pages.css">
+
+  <script
+    src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"
+    defer
+  ></script>
+
+  <script
+    src="supabase-config.js"
+    defer
+  ></script>
+
+  <script
+    src="store-common.js"
+    defer
+  ></script>
+
+  <script
+    src="catalogo.js"
+    defer
+  ></script>
+</head>
+
+<body>
+
+  <!-- ==========================================
+       ANNOUNCEMENT
+  =========================================== -->
+
+  <div class="announcement">
+    <p>
+      PRODUCTOS SELECCIONADOS · COMPRA SEGURA · EXPERIENCIA DUVANT 12
+    </p>
+  </div>
+
+
+  <!-- ==========================================
+       HEADER
+  =========================================== -->
+
+  <header class="site-header scrolled">
+
+    <div class="header-container">
+
+      <button
+        class="mobile-menu-button"
+        id="catalogMobileMenuButton"
+        type="button"
+        aria-label="Abrir menú"
+        aria-expanded="false"
+      >
+        <span></span>
+        <span></span>
+      </button>
+
+
+      <a
+        href="index.html"
+        class="brand"
+        aria-label="DUVANT 12 Inicio"
+      >
+
+        <span class="brand-mark">
+          D12
+        </span>
+
+        <span class="brand-copy">
+          <strong>DUVANT 12</strong>
+          <small>Fragrances House</small>
+        </span>
+
+      </a>
+
+
+      <nav
+        class="desktop-nav"
+        aria-label="Navegación principal"
+      >
+
+        <a href="index.html">
+          Inicio
+        </a>
+
+
+        <div class="nav-dropdown">
+
+          <button
+            class="nav-dropdown-trigger"
+            type="button"
+          >
+            Perfumes
+            <span>⌄</span>
+          </button>
+
+
+          <div class="nav-dropdown-menu">
+
+            <div class="nav-dropdown-heading">
+              <span>PERFUMES</span>
+              <small>
+                Explora la colección DUVANT 12
+              </small>
+            </div>
+
+
+            <a
+              href="catalogo.html"
+              class="active"
+            >
+              <span>Ver todos</span>
+              <b>→</b>
+            </a>
+
+            <a href="catalogo.html?categoria=Hombre">
+              <span>Hombre</span>
+              <b>→</b>
+            </a>
+
+            <a href="catalogo.html?categoria=Mujer">
+              <span>Mujer</span>
+              <b>→</b>
+            </a>
+
+            <a href="catalogo.html?categoria=Unisex">
+              <span>Unisex</span>
+              <b>→</b>
+            </a>
+
+
+            <div class="nav-dropdown-divider"></div>
+
+
+            <a href="index.html#bestsellers">
+              <span>Más vendidos</span>
+              <b>→</b>
+            </a>
+
+            <a href="index.html#novedades">
+              <span>Novedades</span>
+              <b>→</b>
+            </a>
+
+          </div>
+
+        </div>
+
+
+        <a href="index.html#bestsellers">
+          Más vendidos
+        </a>
+
+        <a href="index.html#novedades">
+          Novedades
+        </a>
+
+        <a href="index.html#experiencia">
+          Nosotros
+        </a>
+
+      </nav>
+
+
+      <div class="header-actions">
+
+        <button
+          class="header-action"
+          id="catalogFocusSearch"
+          type="button"
+          aria-label="Buscar perfumes"
+        >
+
+          <svg
+            viewBox="0 0 24 24"
+            aria-hidden="true"
+          >
+            <circle
+              cx="11"
+              cy="11"
+              r="6"
+            ></circle>
+
+            <path d="M16 16L21 21"></path>
+          </svg>
+
+        </button>
+
+
+        <button
+          class="header-action"
+          id="catalogCartButton"
+          type="button"
+          aria-label="Abrir carrito"
+        >
+
+          <svg
+            viewBox="0 0 24 24"
+            aria-hidden="true"
+          >
+            <path d="M6 8H18L17 20H7L6 8Z"></path>
+
+            <path
+              d="M9 9V6C9 4.34 10.34 3 12 3C13.66 3 15 4.34 15 6V9"
+            ></path>
+          </svg>
+
+          <span
+            class="cart-count"
+            data-cart-count
+          >
+            0
+          </span>
+
+        </button>
+
+      </div>
+
+    </div>
+
+  </header>
+
+
+  <!-- ==========================================
+       MOBILE MENU
+  =========================================== -->
+
+  <div
+    class="mobile-menu"
+    id="catalogMobileMenu"
+    aria-hidden="true"
+  >
+
+    <div class="mobile-menu-header">
+
+      <a
+        href="index.html"
+        class="brand"
+      >
+
+        <span class="brand-mark">
+          D12
+        </span>
+
+        <span class="brand-copy">
+          <strong>DUVANT 12</strong>
+          <small>Fragrances House</small>
+        </span>
+
+      </a>
+
+
+      <button
+        class="close-button"
+        id="catalogCloseMobileMenu"
+        type="button"
+        aria-label="Cerrar menú"
+      >
+        ×
+      </button>
+
+    </div>
+
+
+    <nav class="mobile-nav">
+
+      <a href="index.html">
+        <span>01</span>
+        Inicio
+      </a>
+
+      <a href="catalogo.html">
+        <span>02</span>
+        Todos los perfumes
+      </a>
+
+      <a href="catalogo.html?categoria=Hombre">
+        <span>03</span>
+        Hombre
+      </a>
+
+      <a href="catalogo.html?categoria=Mujer">
+        <span>04</span>
+        Mujer
+      </a>
+
+      <a href="catalogo.html?categoria=Unisex">
+        <span>05</span>
+        Unisex
+      </a>
+
+      <a href="index.html#bestsellers">
+        <span>06</span>
+        Más vendidos
+      </a>
+
+      <a href="index.html#novedades">
+        <span>07</span>
+        Novedades
+      </a>
+
+      <a href="index.html#experiencia">
+        <span>08</span>
+        Nosotros
+      </a>
+
+    </nav>
+
+
+    <div class="mobile-menu-footer">
+      <span>DUVANT 12</span>
+      <p>Fragrances House</p>
+    </div>
+
+  </div>
+
+
+  <main>
+
+    <!-- ==========================================
+         CATALOG HEADER
+    =========================================== -->
+
+    <section class="catalog-hero catalog-hero-v2">
+
+      <div class="section-container">
+
+        <nav
+          class="catalog-breadcrumb"
+          aria-label="Breadcrumb"
+        >
+          <a href="index.html">
+            Inicio
+          </a>
+
+          <span>/</span>
+
+          <span>
+            Perfumes
+          </span>
+        </nav>
+
+
+        <div class="catalog-hero-grid">
+
+          <div>
+
+            <span class="section-kicker">
+              DUVANT 12 · Fragrances House
+            </span>
+
+            <h1>
+              Encuentra tu
+              <em>próxima fragancia.</em>
+            </h1>
+
+          </div>
+
+
+          <p>
+            Explora nuestra selección de perfumes
+            para hombre, mujer y propuestas unisex.
+            Filtra por marca, tamaño y disponibilidad
+            para encontrar tu próxima elección.
+          </p>
+
+        </div>
+
+
+        <div
+          class="catalog-category-shortcuts"
+          id="catalogCategoryShortcuts"
+        >
+
+          <button
+            class="active"
+            type="button"
+            data-category="Todos"
+          >
+            Todos
+          </button>
+
+          <button
+            type="button"
+            data-category="Hombre"
+          >
+            Hombre
+          </button>
+
+          <button
+            type="button"
+            data-category="Mujer"
+          >
+            Mujer
+          </button>
+
+          <button
+            type="button"
+            data-category="Unisex"
+          >
+            Unisex
+          </button>
+
+        </div>
+
+      </div>
+
+    </section>
+
+
+    <!-- ==========================================
+         CATALOG
+    =========================================== -->
+
+    <section class="catalog-section catalog-section-v2">
+
+      <div class="section-container">
+
+        <!-- TOP TOOLBAR -->
+
+        <div class="catalog-topbar">
+
+          <div class="catalog-search catalog-search-v2">
+
+            <svg
+              viewBox="0 0 24 24"
+              aria-hidden="true"
+            >
+              <circle
+                cx="11"
+                cy="11"
+                r="6"
+              ></circle>
+
+              <path d="M16 16L21 21"></path>
+            </svg>
+
+
+            <input
+              id="catalogSearch"
+              type="search"
+              placeholder="Buscar perfume, marca o código..."
+              autocomplete="off"
+            >
+
+          </div>
+
+
+          <button
+            class="catalog-mobile-filter-button"
+            id="openCatalogFilters"
+            type="button"
+          >
+            <span>
+              Filtrar
+            </span>
+
+            <b id="mobileFilterCount">
+              0
+            </b>
+          </button>
+
+
+          <select
+            id="catalogSort"
+            class="catalog-sort catalog-sort-v2"
+            aria-label="Ordenar catálogo"
+          >
+
+            <option value="featured">
+              Destacados
+            </option>
+
+            <option value="price-low">
+              Precio: menor a mayor
+            </option>
+
+            <option value="price-high">
+              Precio: mayor a menor
+            </option>
+
+            <option value="name">
+              Nombre A-Z
+            </option>
+
+          </select>
+
+        </div>
+
+
+        <!-- META -->
+
+        <div class="catalog-meta catalog-meta-v2">
+
+          <div>
+
+            <strong id="catalogResultCount">
+              Cargando...
+            </strong>
+
+            <span>
+              encontrados
+            </span>
+
+          </div>
+
+
+          <button
+            id="clearAllFiltersTop"
+            class="catalog-clear-top"
+            type="button"
+            hidden
+          >
+            Limpiar filtros
+          </button>
+
+        </div>
+
+
+        <!-- ACTIVE FILTERS -->
+
+        <div
+          class="catalog-active-filters"
+          id="catalogActiveFilters"
+          hidden
+        ></div>
+
+
+        <!-- LAYOUT -->
+
+        <div class="catalog-layout">
+
+          <!-- SIDEBAR -->
+
+          <aside
+            class="catalog-sidebar"
+            id="catalogSidebar"
+          >
+
+            <div class="catalog-sidebar-heading">
+
+              <div>
+                <span>
+                  FILTRAR
+                </span>
+
+                <small>
+                  Refinar resultados
+                </small>
+              </div>
+
+
+              <button
+                id="clearAllFilters"
+                type="button"
+              >
+                Limpiar
+              </button>
+
+            </div>
+
+
+            <!-- AVAILABILITY -->
+
+            <div class="catalog-filter-group">
+
+              <button
+                class="catalog-filter-heading"
+                type="button"
+                data-filter-toggle="availabilityFilter"
+                aria-expanded="true"
+              >
+                <span>
+                  Disponibilidad
+                </span>
+
+                <b>−</b>
+              </button>
+
+
+              <div
+                class="catalog-filter-options"
+                id="availabilityFilter"
+              >
+
+                <label class="catalog-check">
+
+                  <input
+                    type="checkbox"
+                    id="filterAvailable"
+                    value="available"
+                  >
+
+                  <span class="catalog-check-box"></span>
+
+                  <span>
+                    Disponible
+                  </span>
+
+                </label>
+
+              </div>
+
+            </div>
+
+
+            <!-- CATEGORY -->
+
+            <div class="catalog-filter-group">
+
+              <button
+                class="catalog-filter-heading"
+                type="button"
+                data-filter-toggle="categoryFilterPanel"
+                aria-expanded="true"
+              >
+
+                <span>
+                  Categoría
+                </span>
+
+                <b>−</b>
+
+              </button>
+
+
+              <div
+                class="catalog-filter-options"
+                id="categoryFilterPanel"
+              >
+
+                <label class="catalog-check">
+
+                  <input
+                    type="radio"
+                    name="catalogCategory"
+                    value="Todos"
+                    checked
+                  >
+
+                  <span class="catalog-radio-box"></span>
+
+                  <span>
+                    Todos
+                  </span>
+
+                </label>
+
+
+                <label class="catalog-check">
+
+                  <input
+                    type="radio"
+                    name="catalogCategory"
+                    value="Hombre"
+                  >
+
+                  <span class="catalog-radio-box"></span>
+
+                  <span>
+                    Hombre
+                  </span>
+
+                </label>
+
+
+                <label class="catalog-check">
+
+                  <input
+                    type="radio"
+                    name="catalogCategory"
+                    value="Mujer"
+                  >
+
+                  <span class="catalog-radio-box"></span>
+
+                  <span>
+                    Mujer
+                  </span>
+
+                </label>
+
+
+                <label class="catalog-check">
+
+                  <input
+                    type="radio"
+                    name="catalogCategory"
+                    value="Unisex"
+                  >
+
+                  <span class="catalog-radio-box"></span>
+
+                  <span>
+                    Unisex
+                  </span>
+
+                </label>
+
+              </div>
+
+            </div>
+
+
+            <!-- BRANDS -->
+
+            <div class="catalog-filter-group">
+
+              <button
+                class="catalog-filter-heading"
+                type="button"
+                data-filter-toggle="brandFilters"
+                aria-expanded="true"
+              >
+
+                <span>
+                  Marca
+                </span>
+
+                <b>−</b>
+
+              </button>
+
+
+              <div
+                class="catalog-filter-options"
+                id="brandFilters"
+              ></div>
+
+            </div>
+
+
+            <!-- SIZES -->
+
+            <div class="catalog-filter-group">
+
+              <button
+                class="catalog-filter-heading"
+                type="button"
+                data-filter-toggle="sizeFilters"
+                aria-expanded="true"
+              >
+
+                <span>
+                  Tamaño
+                </span>
+
+                <b>−</b>
+
+              </button>
+
+
+              <div
+                class="catalog-filter-options"
+                id="sizeFilters"
+              ></div>
+
+            </div>
+
+          </aside>
+
+
+          <!-- PRODUCTS -->
+
+          <div class="catalog-products-column">
+
+            <div
+              class="catalog-grid"
+              id="catalogGrid"
+            >
+
+              <div
+                class="catalog-empty"
+                style="grid-column: 1 / -1;"
+              >
+
+                <span>
+                  ◇
+                </span>
+
+                <h2>
+                  Cargando colección
+                </h2>
+
+                <p>
+                  Preparando perfumes DUVANT 12...
+                </p>
+
+              </div>
+
+            </div>
+
+
+            <div
+              class="catalog-empty"
+              id="catalogEmpty"
+              hidden
+            >
+
+              <span>
+                ◇
+              </span>
+
+              <h2>
+                No encontramos resultados
+              </h2>
+
+              <p>
+                Intenta eliminar algunos filtros
+                o realizar otra búsqueda.
+              </p>
+
+
+              <button
+                class="button button-outline"
+                id="catalogEmptyReset"
+                type="button"
+              >
+                Limpiar filtros
+              </button>
+
+            </div>
+
+
+            <div
+              class="catalog-empty"
+              id="catalogError"
+              hidden
+            >
+
+              <span>
+                !
+              </span>
+
+              <h2>
+                No pudimos cargar el catálogo
+              </h2>
+
+              <p>
+                Revisa la conexión con Supabase
+                e inténtalo nuevamente.
+              </p>
+
+            </div>
+
+          </div>
+
+        </div>
+
+      </div>
+
+    </section>
+
+  </main>
+
+
+  <!-- ==========================================
+       FILTER DRAWER MOBILE
+  =========================================== -->
+
+  <div
+    class="catalog-filter-overlay"
+    id="catalogFilterOverlay"
+  ></div>
+
+
+  <aside
+    class="catalog-filter-drawer"
+    id="catalogFilterDrawer"
+    aria-hidden="true"
+  >
+
+    <div class="catalog-filter-drawer-header">
+
+      <div>
+        <span>
+          DUVANT 12
+        </span>
+
+        <h2>
+          Filtrar perfumes
+        </h2>
+      </div>
+
+
+      <button
+        class="close-button"
+        id="closeCatalogFilters"
+        type="button"
+        aria-label="Cerrar filtros"
+      >
+        ×
+      </button>
+
+    </div>
+
+
+    <div
+      class="catalog-filter-drawer-content"
+      id="catalogFilterDrawerContent"
+    ></div>
+
+
+    <div class="catalog-filter-drawer-footer">
+
+      <button
+        class="catalog-filter-clear-mobile"
+        id="clearMobileFilters"
+        type="button"
+      >
+        Limpiar
+      </button>
+
+
+      <button
+        class="checkout-button"
+        id="applyMobileFilters"
+        type="button"
+      >
+        Ver resultados
+        <span>→</span>
+      </button>
+
+    </div>
+
+  </aside>
+
+
+  <!-- ==========================================
+       FOOTER
+  =========================================== -->
+
+  <footer class="site-footer">
+
+    <div class="section-container">
+
+      <div class="footer-main">
+
+        <div class="footer-brand">
+
+          <a
+            href="index.html"
+            class="brand"
+          >
+
+            <span class="brand-mark">
+              D12
+            </span>
+
+            <span class="brand-copy">
+              <strong>DUVANT 12</strong>
+              <small>Fragrances House</small>
+            </span>
+
+          </a>
+
+
+          <p>
+            Perfumes seleccionados para quienes
+            entienden que una fragancia también
+            es una forma de expresión.
+          </p>
+
+        </div>
+
+
+        <div class="footer-column">
+
+          <span>
+            Tienda
+          </span>
+
+          <a href="catalogo.html">
+            Todos los perfumes
+          </a>
+
+          <a href="catalogo.html?categoria=Hombre">
+            Hombre
+          </a>
+
+          <a href="catalogo.html?categoria=Mujer">
+            Mujer
+          </a>
+
+          <a href="catalogo.html?categoria=Unisex">
+            Unisex
+          </a>
+
+        </div>
+
+
+        <div class="footer-column">
+
+          <span>
+            Descubre
+          </span>
+
+          <a href="index.html#bestsellers">
+            Más vendidos
+          </a>
+
+          <a href="index.html#novedades">
+            Novedades
+          </a>
+
+          <a href="index.html#destacados">
+            Selección D12
+          </a>
+
+        </div>
+
+
+        <div class="footer-column">
+
+          <span>
+            DUVANT 12
+          </span>
+
+          <a href="index.html#experiencia">
+            Nosotros
+          </a>
+
+          <a href="index.html">
+            Contacto
+          </a>
+
+          <a href="index.html">
+            Ayuda
+          </a>
+
+        </div>
+
+      </div>
+
+
+      <div class="footer-bottom">
+
+        <span>
+          ©
+          <span data-current-year></span>
+          DUVANT 12.
+        </span>
+
+        <span>
+          Fragrances House
+        </span>
+
+      </div>
+
+    </div>
+
+  </footer>
+
+
+  <!-- ==========================================
+       CART
+  =========================================== -->
+
+  <div
+    class="drawer-overlay"
+    id="catalogDrawerOverlay"
+  ></div>
+
+
+  <aside
+    class="cart-drawer"
+    id="catalogCartDrawer"
+    aria-hidden="true"
+  >
+
+    <div class="cart-header">
+
+      <div>
+
+        <span>
+          Tu selección
+        </span>
+
+        <h2>
+          Carrito
+        </h2>
+
+      </div>
+
+
+      <button
+        class="close-button"
+        id="catalogCloseCart"
+        type="button"
+        aria-label="Cerrar carrito"
+      >
+        ×
+      </button>
+
+    </div>
+
+
+    <div
+      class="cart-items"
+      id="catalogCartItems"
+    ></div>
+
+
+    <div
+      class="cart-empty"
+      id="catalogCartEmpty"
+    >
+
+      <div>
+        ◇
+      </div>
+
+      <strong>
+        Tu carrito está vacío
+      </strong>
+
+      <p>
+        Agrega una fragancia para comenzar.
+      </p>
+
+    </div>
+
+
+    <div
+      class="cart-footer"
+      id="catalogCartFooter"
+    >
+
+      <div class="cart-subtotal">
+
+        <span>
+          Subtotal
+        </span>
+
+        <strong id="catalogCartSubtotal">
+          $0.00
+        </strong>
+
+      </div>
+
+
+      <p>
+        Envío e impuestos se calcularán
+        durante el checkout.
+      </p>
+
+
+      <button
+        class="checkout-button"
+        id="catalogCheckoutButton"
+        type="button"
+      >
+        Continuar compra
+        <span>→</span>
+      </button>
+
+    </div>
+
+  </aside>
+
+
+  <div
+    class="store-toast"
+    id="storeToast"
+    role="status"
+    aria-live="polite"
+  ></div>
+
+</body>
+</html>

@@ -1,0 +1,699 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
+  >
+
+  <meta
+    name="description"
+    content="Carrito de compra DUVANT 12."
+  >
+
+  <title>Carrito | DUVANT 12</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
+    rel="stylesheet"
+  >
+
+  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="store-pages.css">
+
+  <script
+    src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"
+    defer
+  ></script>
+
+  <script
+    src="supabase-config.js"
+    defer
+  ></script>
+
+  <script
+    src="store-common.js"
+    defer
+  ></script>
+
+  <script
+    src="carrito.js"
+    defer
+  ></script>
+</head>
+
+<body>
+
+  <!-- ==========================================
+       ANNOUNCEMENT
+  =========================================== -->
+
+  <div class="announcement">
+    <p>
+      PRODUCTOS SELECCIONADOS · COMPRA SEGURA · EXPERIENCIA DUVANT 12
+    </p>
+  </div>
+
+
+  <!-- ==========================================
+       HEADER
+  =========================================== -->
+
+  <header class="site-header scrolled">
+
+    <div class="header-container">
+
+      <button
+        class="mobile-menu-button"
+        id="cartMobileMenuButton"
+        type="button"
+        aria-label="Abrir menú"
+        aria-expanded="false"
+      >
+        <span></span>
+        <span></span>
+      </button>
+
+
+      <a
+        href="index.html"
+        class="brand"
+        aria-label="DUVANT 12 Inicio"
+      >
+
+        <span class="brand-mark">
+          D12
+        </span>
+
+        <span class="brand-copy">
+          <strong>DUVANT 12</strong>
+          <small>Fragrances House</small>
+        </span>
+
+      </a>
+
+
+      <nav
+        class="desktop-nav"
+        aria-label="Navegación principal"
+      >
+
+        <a href="index.html">
+          Inicio
+        </a>
+
+        <a href="catalogo.html">
+          Perfumes
+        </a>
+
+        <a href="index.html#bestsellers">
+          Más vendidos
+        </a>
+
+        <a href="index.html#novedades">
+          Novedades
+        </a>
+
+        <a href="index.html#experiencia">
+          Nosotros
+        </a>
+
+      </nav>
+
+
+      <div class="header-actions">
+
+        <a
+          href="catalogo.html"
+          class="header-action"
+          aria-label="Buscar perfumes"
+        >
+          <svg
+            viewBox="0 0 24 24"
+            aria-hidden="true"
+          >
+            <circle
+              cx="11"
+              cy="11"
+              r="6"
+            ></circle>
+
+            <path d="M16 16L21 21"></path>
+          </svg>
+        </a>
+
+
+        <a
+          href="carrito.html"
+          class="header-action"
+          aria-label="Ver carrito"
+        >
+          <svg
+            viewBox="0 0 24 24"
+            aria-hidden="true"
+          >
+            <path d="M6 8H18L17 20H7L6 8Z"></path>
+
+            <path
+              d="M9 9V6C9 4.34 10.34 3 12 3C13.66 3 15 4.34 15 6V9"
+            ></path>
+          </svg>
+
+          <span
+            class="cart-count"
+            data-cart-count
+          >
+            0
+          </span>
+        </a>
+
+      </div>
+
+    </div>
+
+  </header>
+
+
+  <!-- ==========================================
+       MOBILE MENU
+  =========================================== -->
+
+  <div
+    class="mobile-menu"
+    id="cartMobileMenu"
+    aria-hidden="true"
+  >
+
+    <div class="mobile-menu-header">
+
+      <a
+        href="index.html"
+        class="brand"
+      >
+        <span class="brand-mark">
+          D12
+        </span>
+
+        <span class="brand-copy">
+          <strong>DUVANT 12</strong>
+          <small>Fragrances House</small>
+        </span>
+      </a>
+
+
+      <button
+        class="close-button"
+        id="cartCloseMobileMenu"
+        type="button"
+        aria-label="Cerrar menú"
+      >
+        ×
+      </button>
+
+    </div>
+
+
+    <nav class="mobile-nav">
+
+      <a href="index.html">
+        <span>01</span>
+        Inicio
+      </a>
+
+      <a href="catalogo.html">
+        <span>02</span>
+        Todos los perfumes
+      </a>
+
+      <a href="catalogo.html?categoria=Hombre">
+        <span>03</span>
+        Hombre
+      </a>
+
+      <a href="catalogo.html?categoria=Mujer">
+        <span>04</span>
+        Mujer
+      </a>
+
+      <a href="catalogo.html?categoria=Unisex">
+        <span>05</span>
+        Unisex
+      </a>
+
+      <a href="carrito.html">
+        <span>06</span>
+        Carrito
+      </a>
+
+    </nav>
+
+
+    <div class="mobile-menu-footer">
+      <span>DUVANT 12</span>
+      <p>Fragrances House</p>
+    </div>
+
+  </div>
+
+
+  <!-- ==========================================
+       MAIN
+  =========================================== -->
+
+  <main>
+
+    <section class="cart-page">
+
+      <div class="section-container">
+
+        <nav
+          class="checkout-breadcrumb"
+          aria-label="Breadcrumb"
+        >
+          <a href="index.html">
+            Inicio
+          </a>
+
+          <span>/</span>
+
+          <strong>
+            Carrito
+          </strong>
+        </nav>
+
+
+        <div class="cart-page-heading">
+
+          <div>
+            <span class="section-kicker">
+              Tu selección
+            </span>
+
+            <h1>
+              Carrito
+              <em>de compra.</em>
+            </h1>
+          </div>
+
+
+          <a
+            href="catalogo.html"
+            class="text-link"
+          >
+            Seguir comprando
+            <span>→</span>
+          </a>
+
+        </div>
+
+
+        <!-- ==================================
+             LOADING
+        =================================== -->
+
+        <div
+          class="checkout-loading"
+          id="cartLoading"
+        >
+          <span class="checkout-loading-mark">
+            D12
+          </span>
+
+          <p>
+            Verificando tu selección...
+          </p>
+        </div>
+
+
+        <!-- ==================================
+             ERROR
+        =================================== -->
+
+        <div
+          class="checkout-state"
+          id="cartError"
+          hidden
+        >
+          <span>!</span>
+
+          <h2>
+            No pudimos verificar el carrito
+          </h2>
+
+          <p>
+            Revisa tu conexión e inténtalo nuevamente.
+          </p>
+
+          <button
+            class="button button-outline"
+            id="retryCartButton"
+            type="button"
+          >
+            Intentar nuevamente
+          </button>
+        </div>
+
+
+        <!-- ==================================
+             EMPTY
+        =================================== -->
+
+        <div
+          class="checkout-state"
+          id="cartEmptyPage"
+          hidden
+        >
+          <span>◇</span>
+
+          <h2>
+            Tu carrito está vacío
+          </h2>
+
+          <p>
+            Explora nuestra colección y agrega
+            una fragancia para comenzar.
+          </p>
+
+          <a
+            href="catalogo.html"
+            class="button button-primary"
+          >
+            Ver perfumes
+            <span>→</span>
+          </a>
+        </div>
+
+
+        <!-- ==================================
+             CART CONTENT
+        =================================== -->
+
+        <div
+          class="cart-page-grid"
+          id="cartPageContent"
+          hidden
+        >
+
+          <!-- ITEMS -->
+
+          <section class="cart-page-items">
+
+            <div class="cart-page-items-header">
+
+              <div>
+                <span>
+                  PRODUCTOS
+                </span>
+
+                <small id="cartItemCountText">
+                  0 productos
+                </small>
+              </div>
+
+
+              <button
+                id="clearCartButton"
+                type="button"
+              >
+                Vaciar carrito
+              </button>
+
+            </div>
+
+
+            <div
+              id="cartPageItems"
+              class="cart-page-products"
+            ></div>
+
+          </section>
+
+
+          <!-- SUMMARY -->
+
+          <aside class="cart-summary">
+
+            <div class="cart-summary-heading">
+
+              <span>
+                RESUMEN
+              </span>
+
+              <h2>
+                Tu pedido
+              </h2>
+
+            </div>
+
+
+            <div class="cart-summary-row">
+
+              <span>
+                Productos
+              </span>
+
+              <strong id="cartSummaryCount">
+                0
+              </strong>
+
+            </div>
+
+
+            <div class="cart-summary-row">
+
+              <span>
+                Subtotal
+              </span>
+
+              <strong id="cartSummarySubtotal">
+                $0.00
+              </strong>
+
+            </div>
+
+
+            <div class="cart-summary-row muted">
+
+              <span>
+                Envío
+              </span>
+
+              <strong>
+                Se calcula después
+              </strong>
+
+            </div>
+
+
+            <div class="cart-summary-divider"></div>
+
+
+            <div class="cart-summary-total">
+
+              <span>
+                Subtotal
+              </span>
+
+              <strong id="cartSummaryTotal">
+                $0.00
+              </strong>
+
+            </div>
+
+
+            <p class="cart-summary-note">
+              El precio final de envío se mostrará
+              antes de confirmar tu compra.
+            </p>
+
+
+            <button
+              class="checkout-button cart-page-checkout-button"
+              id="goToCheckoutButton"
+              type="button"
+            >
+              Ir al checkout
+              <span>→</span>
+            </button>
+
+
+            <div class="cart-summary-benefits">
+
+              <div>
+                <span>◇</span>
+
+                <p>
+                  <strong>
+                    Inventario conectado
+                  </strong>
+
+                  La disponibilidad se verifica
+                  antes de continuar.
+                </p>
+              </div>
+
+
+              <div>
+                <span>□</span>
+
+                <p>
+                  <strong>
+                    Compra segura
+                  </strong>
+
+                  Tus datos se utilizarán únicamente
+                  para procesar tu pedido.
+                </p>
+              </div>
+
+            </div>
+
+          </aside>
+
+        </div>
+
+      </div>
+
+    </section>
+
+  </main>
+
+
+  <!-- ==========================================
+       FOOTER
+  =========================================== -->
+
+  <footer class="site-footer">
+
+    <div class="section-container">
+
+      <div class="footer-main">
+
+        <div class="footer-brand">
+
+          <a
+            href="index.html"
+            class="brand"
+          >
+            <span class="brand-mark">
+              D12
+            </span>
+
+            <span class="brand-copy">
+              <strong>DUVANT 12</strong>
+              <small>Fragrances House</small>
+            </span>
+          </a>
+
+
+          <p>
+            Perfumes seleccionados para quienes
+            entienden que una fragancia también
+            es una forma de expresión.
+          </p>
+
+        </div>
+
+
+        <div class="footer-column">
+
+          <span>
+            Tienda
+          </span>
+
+          <a href="catalogo.html">
+            Todos los perfumes
+          </a>
+
+          <a href="catalogo.html?categoria=Hombre">
+            Hombre
+          </a>
+
+          <a href="catalogo.html?categoria=Mujer">
+            Mujer
+          </a>
+
+          <a href="catalogo.html?categoria=Unisex">
+            Unisex
+          </a>
+
+        </div>
+
+
+        <div class="footer-column">
+
+          <span>
+            Compra
+          </span>
+
+          <a href="carrito.html">
+            Carrito
+          </a>
+
+          <a href="checkout.html">
+            Checkout
+          </a>
+
+        </div>
+
+
+        <div class="footer-column">
+
+          <span>
+            DUVANT 12
+          </span>
+
+          <a href="index.html#experiencia">
+            Nosotros
+          </a>
+
+          <a href="index.html">
+            Contacto
+          </a>
+
+          <a href="index.html">
+            Ayuda
+          </a>
+
+        </div>
+
+      </div>
+
+
+      <div class="footer-bottom">
+
+        <span>
+          ©
+          <span data-current-year></span>
+          DUVANT 12.
+        </span>
+
+        <span>
+          Fragrances House
+        </span>
+
+      </div>
+
+    </div>
+
+  </footer>
+
+
+  <!-- ==========================================
+       TOAST
+  =========================================== -->
+
+  <div
+    class="store-toast"
+    id="storeToast"
+    role="status"
+    aria-live="polite"
+  ></div>
+
+</body>
+</html>

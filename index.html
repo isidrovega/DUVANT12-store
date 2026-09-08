@@ -1,0 +1,1482 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
+  >
+
+  <meta
+    name="description"
+    content="DUVANT 12 Fragrances House. Perfumes seleccionados para hombre, mujer y unisex."
+  >
+
+  <title>DUVANT 12 | Fragrances House</title>
+
+  <link
+    rel="preconnect"
+    href="https://fonts.googleapis.com"
+  >
+
+  <link
+    rel="preconnect"
+    href="https://fonts.gstatic.com"
+    crossorigin
+  >
+
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
+    rel="stylesheet"
+  >
+
+  <link
+    rel="stylesheet"
+    href="styles.css"
+  >
+
+  <script
+    src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"
+    defer
+  ></script>
+
+  <script
+    src="supabase-config.js"
+    defer
+  ></script>
+
+  <script
+    src="store-common.js"
+    defer
+  ></script>
+
+  <script
+    src="app.js"
+    defer
+  ></script>
+</head>
+
+<body>
+
+  <!-- ==========================================
+       ANNOUNCEMENT
+  =========================================== -->
+
+  <div class="announcement">
+    <p>
+      PRODUCTOS SELECCIONADOS · COMPRA SEGURA · EXPERIENCIA DUVANT 12
+    </p>
+  </div>
+
+
+  <!-- ==========================================
+       HEADER
+  =========================================== -->
+
+  <header
+    class="site-header"
+    id="siteHeader"
+  >
+
+    <div class="header-container">
+
+      <button
+        class="mobile-menu-button"
+        id="mobileMenuButton"
+        type="button"
+        aria-label="Abrir menú"
+        aria-expanded="false"
+      >
+        <span></span>
+        <span></span>
+      </button>
+
+
+      <a
+        href="index.html"
+        class="brand"
+        aria-label="DUVANT 12 Inicio"
+      >
+
+        <span class="brand-mark">
+          D12
+        </span>
+
+        <span class="brand-copy">
+          <strong>DUVANT 12</strong>
+          <small>Fragrances House</small>
+        </span>
+
+      </a>
+
+
+      <nav
+        class="desktop-nav"
+        aria-label="Navegación principal"
+      >
+
+        <a
+          href="index.html"
+          class="active"
+        >
+          Inicio
+        </a>
+
+
+        <div class="nav-dropdown">
+
+          <button
+            class="nav-dropdown-trigger"
+            type="button"
+          >
+            Perfumes
+            <span>⌄</span>
+          </button>
+
+
+          <div class="nav-dropdown-menu">
+
+            <div class="nav-dropdown-heading">
+              <span>PERFUMES</span>
+              <small>Explora la colección DUVANT 12</small>
+            </div>
+
+
+            <a href="catalogo.html">
+              <span>Ver todos</span>
+              <b>→</b>
+            </a>
+
+            <a href="catalogo.html?categoria=Hombre">
+              <span>Hombre</span>
+              <b>→</b>
+            </a>
+
+            <a href="catalogo.html?categoria=Mujer">
+              <span>Mujer</span>
+              <b>→</b>
+            </a>
+
+            <a href="catalogo.html?categoria=Unisex">
+              <span>Unisex</span>
+              <b>→</b>
+            </a>
+
+
+            <div class="nav-dropdown-divider"></div>
+
+
+            <button
+              type="button"
+              data-scroll-section="bestsellers"
+            >
+              <span>Más vendidos</span>
+              <b>→</b>
+            </button>
+
+            <button
+              type="button"
+              data-scroll-section="novedades"
+            >
+              <span>Novedades</span>
+              <b>→</b>
+            </button>
+
+          </div>
+
+        </div>
+
+
+        <a href="#bestsellers">
+          Más vendidos
+        </a>
+
+        <a href="#novedades">
+          Novedades
+        </a>
+
+        <a href="#experiencia">
+          Nosotros
+        </a>
+
+      </nav>
+
+
+      <div class="header-actions">
+
+        <button
+          class="header-action search-button"
+          id="searchButton"
+          type="button"
+          aria-label="Buscar perfumes"
+        >
+
+          <svg
+            viewBox="0 0 24 24"
+            aria-hidden="true"
+          >
+            <circle
+              cx="11"
+              cy="11"
+              r="6"
+            ></circle>
+
+            <path d="M16 16L21 21"></path>
+          </svg>
+
+        </button>
+
+
+        <button
+          class="header-action"
+          id="cartButton"
+          type="button"
+          aria-label="Abrir carrito"
+        >
+
+          <svg
+            viewBox="0 0 24 24"
+            aria-hidden="true"
+          >
+            <path d="M6 8H18L17 20H7L6 8Z"></path>
+
+            <path
+              d="M9 9V6C9 4.34 10.34 3 12 3C13.66 3 15 4.34 15 6V9"
+            ></path>
+          </svg>
+
+          <span
+            class="cart-count"
+            data-cart-count
+            id="cartCount"
+          >
+            0
+          </span>
+
+        </button>
+
+      </div>
+
+    </div>
+
+  </header>
+
+
+  <!-- ==========================================
+       MOBILE MENU
+  =========================================== -->
+
+  <div
+    class="mobile-menu"
+    id="mobileMenu"
+    aria-hidden="true"
+  >
+
+    <div class="mobile-menu-header">
+
+      <a
+        href="index.html"
+        class="brand"
+      >
+        <span class="brand-mark">
+          D12
+        </span>
+
+        <span class="brand-copy">
+          <strong>DUVANT 12</strong>
+          <small>Fragrances House</small>
+        </span>
+      </a>
+
+
+      <button
+        class="close-button"
+        id="closeMobileMenu"
+        type="button"
+        aria-label="Cerrar menú"
+      >
+        ×
+      </button>
+
+    </div>
+
+
+    <nav class="mobile-nav">
+
+      <a href="index.html">
+        <span>01</span>
+        Inicio
+      </a>
+
+      <a href="catalogo.html">
+        <span>02</span>
+        Perfumes
+      </a>
+
+      <a href="catalogo.html?categoria=Hombre">
+        <span>03</span>
+        Hombre
+      </a>
+
+      <a href="catalogo.html?categoria=Mujer">
+        <span>04</span>
+        Mujer
+      </a>
+
+      <a href="catalogo.html?categoria=Unisex">
+        <span>05</span>
+        Unisex
+      </a>
+
+      <a href="#bestsellers">
+        <span>06</span>
+        Más vendidos
+      </a>
+
+      <a href="#novedades">
+        <span>07</span>
+        Novedades
+      </a>
+
+      <a href="#experiencia">
+        <span>08</span>
+        Nosotros
+      </a>
+
+    </nav>
+
+
+    <div class="mobile-menu-footer">
+
+      <span>DUVANT 12</span>
+
+      <p>
+        Fragrances House
+      </p>
+
+    </div>
+
+  </div>
+
+
+  <!-- ==========================================
+       SEARCH
+  =========================================== -->
+
+  <div
+    class="search-overlay"
+    id="searchOverlay"
+    aria-hidden="true"
+  >
+
+    <div class="search-panel">
+
+      <div class="search-heading">
+
+        <span>
+          Buscar en DUVANT 12
+        </span>
+
+        <button
+          class="close-button"
+          id="closeSearch"
+          type="button"
+          aria-label="Cerrar búsqueda"
+        >
+          ×
+        </button>
+
+      </div>
+
+
+      <div class="search-input-wrapper">
+
+        <svg
+          viewBox="0 0 24 24"
+          aria-hidden="true"
+        >
+          <circle
+            cx="11"
+            cy="11"
+            r="6"
+          ></circle>
+
+          <path d="M16 16L21 21"></path>
+        </svg>
+
+        <input
+          id="storeSearchInput"
+          type="search"
+          placeholder="Perfume, marca o categoría..."
+          autocomplete="off"
+        >
+
+      </div>
+
+
+      <div
+        class="search-results"
+        id="searchResults"
+      >
+
+        <p class="search-hint">
+          Escribe el nombre de una fragancia o marca.
+        </p>
+
+      </div>
+
+    </div>
+
+  </div>
+
+
+  <main>
+
+    <!-- ==========================================
+         HERO
+    =========================================== -->
+
+    <section
+      class="hero"
+      id="inicio"
+    >
+
+      <div class="hero-glow hero-glow-one"></div>
+      <div class="hero-glow hero-glow-two"></div>
+
+
+      <div class="hero-container">
+
+        <div class="hero-content">
+
+          <div class="eyebrow">
+            <span></span>
+            PERFUMERÍA CONTEMPORÁNEA
+          </div>
+
+
+          <h1>
+            Encuentra una fragancia
+            <em>que hable por ti.</em>
+          </h1>
+
+
+          <p class="hero-description">
+            Una selección de perfumes para quienes
+            entienden que una fragancia no solo se usa:
+            se convierte en parte de su presencia.
+          </p>
+
+
+          <div class="hero-actions">
+
+            <a
+              href="catalogo.html"
+              class="button button-primary"
+            >
+              Explorar perfumes
+              <span>→</span>
+            </a>
+
+            <a
+              href="#colecciones"
+              class="button button-secondary"
+            >
+              Ver colecciones
+            </a>
+
+          </div>
+
+
+          <div class="hero-meta">
+
+            <div>
+              <strong>Selección</strong>
+              <span>Curada cuidadosamente</span>
+            </div>
+
+            <div class="meta-divider"></div>
+
+            <div>
+              <strong>Experiencia</strong>
+              <span>Servicio DUVANT 12</span>
+            </div>
+
+          </div>
+
+        </div>
+
+
+        <div class="hero-visual">
+
+          <div class="hero-frame">
+
+            <div class="hero-frame-label">
+              <span>DUVANT 12</span>
+              <span>FRAGRANCES</span>
+            </div>
+
+
+            <div class="hero-product">
+
+              <div class="hero-product-glow"></div>
+
+
+              <div class="perfume-bottle">
+
+                <div class="bottle-cap"></div>
+                <div class="bottle-neck"></div>
+
+
+                <div class="bottle-body">
+
+                  <div class="bottle-shine"></div>
+
+
+                  <div class="bottle-label">
+                    <span>DUVANT</span>
+                    <strong>12</strong>
+                    <small>FRAGRANCES</small>
+                  </div>
+
+                </div>
+
+              </div>
+
+            </div>
+
+
+            <div class="hero-product-info">
+
+              <div>
+                <span>Selección D12</span>
+                <strong>Signature Collection</strong>
+              </div>
+
+              <small>
+                Una presencia que permanece.
+              </small>
+
+            </div>
+
+          </div>
+
+        </div>
+
+      </div>
+
+
+      <div class="hero-scroll">
+        <span></span>
+        Descubrir
+      </div>
+
+    </section>
+
+
+    <!-- ==========================================
+         CATEGORÍAS RÁPIDAS
+    =========================================== -->
+
+    <section
+      class="collections-section home-category-section"
+      id="colecciones"
+    >
+
+      <div class="section-container">
+
+        <div class="section-heading">
+
+          <div>
+            <span class="section-kicker">
+              Explora
+            </span>
+
+            <h2>
+              Encuentra tu estilo
+            </h2>
+          </div>
+
+
+          <a
+            href="catalogo.html"
+            class="text-link"
+          >
+            Ver todos
+            <span>→</span>
+          </a>
+
+        </div>
+
+
+        <div class="collections-grid">
+
+          <a
+            class="collection-card collection-men"
+            href="catalogo.html?categoria=Hombre"
+          >
+
+            <div class="collection-art">
+              <div class="abstract-bottle bottle-dark"></div>
+            </div>
+
+            <div class="collection-overlay"></div>
+
+
+            <div class="collection-content">
+
+              <span>01</span>
+
+              <h3>
+                Hombre
+              </h3>
+
+              <p>
+                Carácter, intensidad y presencia.
+              </p>
+
+              <strong>
+                Explorar
+                <b>→</b>
+              </strong>
+
+            </div>
+
+          </a>
+
+
+          <a
+            class="collection-card collection-women"
+            href="catalogo.html?categoria=Mujer"
+          >
+
+            <div class="collection-art">
+              <div class="abstract-bottle bottle-light"></div>
+            </div>
+
+            <div class="collection-overlay"></div>
+
+
+            <div class="collection-content">
+
+              <span>02</span>
+
+              <h3>
+                Mujer
+              </h3>
+
+              <p>
+                Elegancia, expresión y personalidad.
+              </p>
+
+              <strong>
+                Explorar
+                <b>→</b>
+              </strong>
+
+            </div>
+
+          </a>
+
+
+          <a
+            class="collection-card collection-unisex"
+            href="catalogo.html?categoria=Unisex"
+          >
+
+            <div class="collection-art">
+              <div class="abstract-bottle bottle-silver"></div>
+            </div>
+
+            <div class="collection-overlay"></div>
+
+
+            <div class="collection-content">
+
+              <span>03</span>
+
+              <h3>
+                Unisex
+              </h3>
+
+              <p>
+                Sin reglas. Solo una gran fragancia.
+              </p>
+
+              <strong>
+                Explorar
+                <b>→</b>
+              </strong>
+
+            </div>
+
+          </a>
+
+        </div>
+
+      </div>
+
+    </section>
+
+
+    <!-- ==========================================
+         MÁS VENDIDOS
+    =========================================== -->
+
+    <section
+      class="products-section home-bestsellers-section"
+      id="bestsellers"
+    >
+
+      <div class="section-container">
+
+        <div class="section-heading">
+
+          <div>
+
+            <span class="section-kicker">
+              Favoritos
+            </span>
+
+            <h2>
+              Más vendidos
+            </h2>
+
+          </div>
+
+
+          <a
+            href="catalogo.html"
+            class="text-link"
+          >
+            Ver catálogo
+            <span>→</span>
+          </a>
+
+        </div>
+
+
+        <div
+          class="product-grid"
+          id="bestsellerProducts"
+        >
+          <div class="home-loading">
+            Cargando perfumes...
+          </div>
+        </div>
+
+      </div>
+
+    </section>
+
+
+    <!-- ==========================================
+         EDITORIAL
+    =========================================== -->
+
+    <section class="editorial-section">
+
+      <div class="section-container">
+
+        <div class="editorial-panel">
+
+          <div class="editorial-glow"></div>
+
+
+          <div class="editorial-number">
+            12
+          </div>
+
+
+          <div class="editorial-copy">
+
+            <span class="section-kicker">
+              DUVANT 12 · FRAGRANCES HOUSE
+            </span>
+
+            <h2>
+              Una fragancia.
+              <em>Una presencia.</em>
+            </h2>
+
+            <p>
+              Descubre aromas que acompañan tu identidad
+              y dejan una impresión que permanece.
+            </p>
+
+
+            <a
+              href="catalogo.html"
+              class="button button-outline"
+            >
+              Descubrir colección
+              <span>→</span>
+            </a>
+
+          </div>
+
+
+          <div class="editorial-object">
+
+            <div class="editorial-bottle">
+
+              <div class="editorial-bottle-cap"></div>
+
+              <div class="editorial-bottle-body">
+                <span>DUVANT</span>
+                <strong>12</strong>
+                <small>FRAGRANCES</small>
+              </div>
+
+            </div>
+
+          </div>
+
+        </div>
+
+      </div>
+
+    </section>
+
+
+    <!-- ==========================================
+         NOVEDADES
+    =========================================== -->
+
+    <section
+      class="products-section arrivals-section"
+      id="novedades"
+    >
+
+      <div class="section-container">
+
+        <div class="section-heading">
+
+          <div>
+
+            <span class="section-kicker">
+              Descubre lo nuevo
+            </span>
+
+            <h2>
+              Nuevos ingresos
+            </h2>
+
+          </div>
+
+
+          <a
+            href="catalogo.html"
+            class="text-link"
+          >
+            Explorar catálogo
+            <span>→</span>
+          </a>
+
+        </div>
+
+
+        <div
+          class="product-grid"
+          id="newProducts"
+        >
+          <div class="home-loading">
+            Cargando perfumes...
+          </div>
+        </div>
+
+      </div>
+
+    </section>
+
+
+    <!-- ==========================================
+         SELECCIÓN D12
+    =========================================== -->
+
+    <section
+      class="products-section"
+      id="destacados"
+    >
+
+      <div class="section-container">
+
+        <div class="section-heading">
+
+          <div>
+
+            <span class="section-kicker">
+              Curaduría DUVANT 12
+            </span>
+
+            <h2>
+              Selección DUVANT 12
+            </h2>
+
+          </div>
+
+
+          <a
+            href="catalogo.html"
+            class="text-link"
+          >
+            Ver catálogo
+            <span>→</span>
+          </a>
+
+        </div>
+
+
+        <div
+          class="product-grid"
+          id="featuredProducts"
+        >
+          <div class="home-loading">
+            Cargando perfumes...
+          </div>
+        </div>
+
+      </div>
+
+    </section>
+
+
+    <!-- ==========================================
+         EXPERIENCIA
+    =========================================== -->
+
+    <section
+      class="experience-section"
+      id="experiencia"
+    >
+
+      <div class="section-container experience-grid">
+
+        <div class="experience-visual">
+
+          <div class="experience-art">
+
+            <span class="experience-number">
+              12
+            </span>
+
+
+            <div class="experience-bottle">
+
+              <div class="experience-cap"></div>
+
+
+              <div class="experience-body">
+                <span>DUVANT</span>
+                <strong>12</strong>
+              </div>
+
+            </div>
+
+
+            <span class="experience-vertical-text">
+              FRAGRANCES HOUSE
+            </span>
+
+          </div>
+
+        </div>
+
+
+        <div class="experience-content">
+
+          <span class="section-kicker">
+            La experiencia DUVANT
+          </span>
+
+
+          <h2>
+            Más que un perfume.
+            <em>Una presencia.</em>
+          </h2>
+
+
+          <p>
+            Buscamos crear una experiencia sencilla,
+            elegante y cercana alrededor de una de las
+            expresiones más personales: tu fragancia.
+          </p>
+
+
+          <div class="experience-points">
+
+            <div>
+
+              <span>01</span>
+
+              <div>
+                <strong>
+                  Selección cuidada
+                </strong>
+
+                <p>
+                  Fragancias elegidas para diferentes
+                  estilos y ocasiones.
+                </p>
+              </div>
+
+            </div>
+
+
+            <div>
+
+              <span>02</span>
+
+              <div>
+                <strong>
+                  Atención personal
+                </strong>
+
+                <p>
+                  Una experiencia cercana antes,
+                  durante y después de tu compra.
+                </p>
+              </div>
+
+            </div>
+
+
+            <div>
+
+              <span>03</span>
+
+              <div>
+                <strong>
+                  Compra sencilla
+                </strong>
+
+                <p>
+                  Encuentra, selecciona y compra tu
+                  próxima fragancia sin complicaciones.
+                </p>
+              </div>
+
+            </div>
+
+          </div>
+
+
+          <a
+            href="catalogo.html"
+            class="button button-outline"
+          >
+            Descubrir perfumes
+            <span>→</span>
+          </a>
+
+        </div>
+
+      </div>
+
+    </section>
+
+
+    <!-- ==========================================
+         BENEFICIOS
+    =========================================== -->
+
+    <section class="benefits-section">
+
+      <div class="section-container benefits-grid">
+
+        <article class="benefit">
+
+          <span class="benefit-number">
+            01
+          </span>
+
+          <div class="benefit-icon">
+            ◇
+          </div>
+
+          <strong>
+            Selección DUVANT 12
+          </strong>
+
+          <p>
+            Una colección elegida cuidadosamente
+            para distintos estilos y personalidades.
+          </p>
+
+        </article>
+
+
+        <article class="benefit">
+
+          <span class="benefit-number">
+            02
+          </span>
+
+          <div class="benefit-icon">
+            □
+          </div>
+
+          <strong>
+            Compra segura
+          </strong>
+
+          <p>
+            Una experiencia diseñada para ser
+            clara, directa y confiable.
+          </p>
+
+        </article>
+
+
+        <article class="benefit">
+
+          <span class="benefit-number">
+            03
+          </span>
+
+          <div class="benefit-icon">
+            →
+          </div>
+
+          <strong>
+            Entrega
+          </strong>
+
+          <p>
+            Información clara sobre tu pedido
+            durante todo el proceso.
+          </p>
+
+        </article>
+
+
+        <article class="benefit">
+
+          <span class="benefit-number">
+            04
+          </span>
+
+          <div class="benefit-icon">
+            +
+          </div>
+
+          <strong>
+            Atención personal
+          </strong>
+
+          <p>
+            Estamos para ayudarte a encontrar
+            la fragancia adecuada.
+          </p>
+
+        </article>
+
+      </div>
+
+    </section>
+
+
+    <!-- ==========================================
+         NEWSLETTER
+    =========================================== -->
+
+    <section class="newsletter-section">
+
+      <div class="section-container newsletter">
+
+        <div>
+
+          <span class="section-kicker">
+            DUVANT 12
+          </span>
+
+          <h2>
+            Descubre lo que llega después.
+          </h2>
+
+          <p>
+            Nuevas fragancias, recomendaciones
+            y lanzamientos directamente en tu correo.
+          </p>
+
+        </div>
+
+
+        <form
+          class="newsletter-form"
+          id="newsletterForm"
+        >
+
+          <label
+            class="sr-only"
+            for="newsletterEmail"
+          >
+            Correo electrónico
+          </label>
+
+          <input
+            id="newsletterEmail"
+            type="email"
+            placeholder="tu@email.com"
+            required
+          >
+
+          <button type="submit">
+            Suscribirme
+            <span>→</span>
+          </button>
+
+        </form>
+
+      </div>
+
+    </section>
+
+  </main>
+
+
+  <!-- ==========================================
+       FOOTER
+  =========================================== -->
+
+  <footer class="site-footer">
+
+    <div class="section-container">
+
+      <div class="footer-main">
+
+        <div class="footer-brand">
+
+          <a
+            href="index.html"
+            class="brand"
+          >
+
+            <span class="brand-mark">
+              D12
+            </span>
+
+            <span class="brand-copy">
+              <strong>DUVANT 12</strong>
+              <small>Fragrances House</small>
+            </span>
+
+          </a>
+
+
+          <p>
+            Perfumes seleccionados para quienes
+            entienden que una fragancia también
+            es una forma de expresión.
+          </p>
+
+        </div>
+
+
+        <div class="footer-column">
+
+          <span>
+            Tienda
+          </span>
+
+          <a href="catalogo.html">
+            Catálogo
+          </a>
+
+          <a href="catalogo.html?categoria=Hombre">
+            Hombre
+          </a>
+
+          <a href="catalogo.html?categoria=Mujer">
+            Mujer
+          </a>
+
+          <a href="catalogo.html?categoria=Unisex">
+            Unisex
+          </a>
+
+        </div>
+
+
+        <div class="footer-column">
+
+          <span>
+            Descubre
+          </span>
+
+          <a href="#bestsellers">
+            Más vendidos
+          </a>
+
+          <a href="#novedades">
+            Novedades
+          </a>
+
+          <a href="#destacados">
+            Selección D12
+          </a>
+
+        </div>
+
+
+        <div class="footer-column">
+
+          <span>
+            DUVANT 12
+          </span>
+
+          <a href="#experiencia">
+            Nosotros
+          </a>
+
+          <a href="#inicio">
+            Contacto
+          </a>
+
+          <a href="#inicio">
+            Ayuda
+          </a>
+
+        </div>
+
+      </div>
+
+
+      <div class="footer-bottom">
+
+        <span>
+          ©
+          <span data-current-year></span>
+          DUVANT 12.
+        </span>
+
+        <span>
+          Fragrances House
+        </span>
+
+      </div>
+
+    </div>
+
+  </footer>
+
+
+  <!-- ==========================================
+       CART
+  =========================================== -->
+
+  <div
+    class="drawer-overlay"
+    id="drawerOverlay"
+  ></div>
+
+
+  <aside
+    class="cart-drawer"
+    id="cartDrawer"
+    aria-hidden="true"
+  >
+
+    <div class="cart-header">
+
+      <div>
+        <span>
+          Tu selección
+        </span>
+
+        <h2>
+          Carrito
+        </h2>
+      </div>
+
+
+      <button
+        class="close-button"
+        id="closeCart"
+        type="button"
+        aria-label="Cerrar carrito"
+      >
+        ×
+      </button>
+
+    </div>
+
+
+    <div
+      class="cart-items"
+      id="cartItems"
+    ></div>
+
+
+    <div
+      class="cart-empty"
+      id="cartEmpty"
+    >
+
+      <div>
+        ◇
+      </div>
+
+      <strong>
+        Tu carrito está vacío
+      </strong>
+
+      <p>
+        Agrega una fragancia para comenzar.
+      </p>
+
+    </div>
+
+
+    <div
+      class="cart-footer"
+      id="cartFooter"
+    >
+
+      <div class="cart-subtotal">
+
+        <span>
+          Subtotal
+        </span>
+
+        <strong id="cartSubtotal">
+          $0.00
+        </strong>
+
+      </div>
+
+
+      <p>
+        Envío e impuestos se calcularán
+        durante el checkout.
+      </p>
+
+
+      <button
+        class="checkout-button"
+        id="checkoutButton"
+        type="button"
+      >
+        Continuar compra
+        <span>→</span>
+      </button>
+
+    </div>
+
+  </aside>
+
+
+  <!-- ==========================================
+       TOAST
+  =========================================== -->
+
+  <div
+    class="store-toast"
+    id="storeToast"
+    role="status"
+    aria-live="polite"
+  ></div>
+
+</body>
+</html>

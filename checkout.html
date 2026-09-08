@@ -1,0 +1,676 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
+  >
+
+  <meta
+    name="description"
+    content="Finaliza tu compra en DUVANT 12."
+  >
+
+  <title>Checkout | DUVANT 12</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
+    rel="stylesheet"
+  >
+
+  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="store-pages.css">
+</head>
+
+<body>
+
+  <!-- =========================
+       HEADER
+  ========================== -->
+
+  <header class="checkout-header">
+    <div class="checkout-header-inner">
+
+      <a
+        href="index.html"
+        class="checkout-brand"
+        aria-label="DUVANT 12"
+      >
+        <span>DUVANT</span>
+        <strong>12</strong>
+      </a>
+
+      <a
+        href="carrito.html"
+        class="checkout-back-link"
+      >
+        ← Volver al carrito
+      </a>
+
+    </div>
+  </header>
+
+
+  <!-- =========================
+       MAIN
+  ========================== -->
+
+  <main class="checkout-page">
+
+    <div class="checkout-page-inner">
+
+      <!-- LOADING -->
+
+      <section
+        id="checkoutLoading"
+        class="store-page-state"
+      >
+        <div class="store-state-mark">D12</div>
+
+        <h1>Preparando checkout</h1>
+
+        <p>
+          Estamos verificando tu carrito.
+        </p>
+      </section>
+
+
+      <!-- EMPTY -->
+
+      <section
+        id="checkoutEmpty"
+        class="store-page-state"
+        hidden
+      >
+        <div class="store-state-mark">D12</div>
+
+        <h1>Tu carrito está vacío</h1>
+
+        <p>
+          Agrega una fragancia antes de continuar.
+        </p>
+
+        <a
+          href="catalogo.html"
+          class="store-primary-button"
+        >
+          Explorar catálogo
+        </a>
+      </section>
+
+
+      <!-- ERROR -->
+
+      <section
+        id="checkoutError"
+        class="store-page-state"
+        hidden
+      >
+        <div class="store-state-mark">!</div>
+
+        <h1>No pudimos cargar el checkout</h1>
+
+        <p>
+          Ocurrió un problema al verificar tu carrito.
+        </p>
+
+        <button
+          id="checkoutRetry"
+          class="store-primary-button"
+          type="button"
+        >
+          Intentar nuevamente
+        </button>
+      </section>
+
+
+      <!-- CHECKOUT -->
+
+      <div
+        id="checkoutContent"
+        class="checkout-layout"
+        hidden
+      >
+
+        <!-- =========================
+             CUSTOMER / SHIPPING
+        ========================== -->
+
+        <section class="checkout-form-panel">
+
+          <div class="checkout-breadcrumb">
+            <a href="carrito.html">Carrito</a>
+
+            <span>/</span>
+
+            <strong>Checkout</strong>
+          </div>
+
+
+          <div class="checkout-heading">
+
+            <span class="checkout-eyebrow">
+              DUVANT 12
+            </span>
+
+            <h1>Finaliza tu pedido</h1>
+
+            <p>
+              Ingresa tus datos para preparar
+              la entrega de tu compra.
+            </p>
+
+          </div>
+
+
+          <form
+            id="checkoutForm"
+            class="checkout-form"
+            novalidate
+          >
+
+            <!-- CONTACT -->
+
+            <section class="checkout-form-section">
+
+              <div class="checkout-section-heading">
+                <span>01</span>
+
+                <div>
+                  <h2>Información de contacto</h2>
+                  <p>
+                    Utilizaremos estos datos para
+                    mantenerte informado sobre tu pedido.
+                  </p>
+                </div>
+              </div>
+
+
+              <div class="checkout-fields-grid">
+
+                <div class="checkout-field">
+                  <label for="firstName">
+                    Nombre
+                  </label>
+
+                  <input
+                    id="firstName"
+                    name="firstName"
+                    type="text"
+                    autocomplete="given-name"
+                    maxlength="80"
+                    required
+                  >
+
+                  <small data-error-for="firstName"></small>
+                </div>
+
+
+                <div class="checkout-field">
+                  <label for="lastName">
+                    Apellidos
+                  </label>
+
+                  <input
+                    id="lastName"
+                    name="lastName"
+                    type="text"
+                    autocomplete="family-name"
+                    maxlength="120"
+                    required
+                  >
+
+                  <small data-error-for="lastName"></small>
+                </div>
+
+
+                <div class="checkout-field">
+                  <label for="email">
+                    Correo electrónico
+                  </label>
+
+                  <input
+                    id="email"
+                    name="email"
+                    type="email"
+                    autocomplete="email"
+                    maxlength="180"
+                    required
+                  >
+
+                  <small data-error-for="email"></small>
+                </div>
+
+
+                <div class="checkout-field">
+                  <label for="phone">
+                    Teléfono
+                  </label>
+
+                  <input
+                    id="phone"
+                    name="phone"
+                    type="tel"
+                    autocomplete="tel"
+                    inputmode="numeric"
+                    maxlength="14"
+                    placeholder="10 dígitos"
+                    required
+                  >
+
+                  <small data-error-for="phone"></small>
+                </div>
+
+              </div>
+
+            </section>
+
+
+            <!-- ADDRESS -->
+
+            <section class="checkout-form-section">
+
+              <div class="checkout-section-heading">
+                <span>02</span>
+
+                <div>
+                  <h2>Dirección de entrega</h2>
+
+                  <p>
+                    Verifica cuidadosamente la
+                    información antes de continuar.
+                  </p>
+                </div>
+              </div>
+
+
+              <div class="checkout-fields-grid">
+
+                <div class="checkout-field checkout-field-full">
+                  <label for="address">
+                    Calle y número
+                  </label>
+
+                  <input
+                    id="address"
+                    name="address"
+                    type="text"
+                    autocomplete="street-address"
+                    maxlength="180"
+                    required
+                  >
+
+                  <small data-error-for="address"></small>
+                </div>
+
+
+                <div class="checkout-field">
+                  <label for="address2">
+                    Interior
+                    <span>(opcional)</span>
+                  </label>
+
+                  <input
+                    id="address2"
+                    name="address2"
+                    type="text"
+                    maxlength="80"
+                  >
+
+                  <small data-error-for="address2"></small>
+                </div>
+
+
+                <div class="checkout-field">
+                  <label for="neighborhood">
+                    Colonia
+                  </label>
+
+                  <input
+                    id="neighborhood"
+                    name="neighborhood"
+                    type="text"
+                    maxlength="120"
+                    required
+                  >
+
+                  <small data-error-for="neighborhood"></small>
+                </div>
+
+
+                <div class="checkout-field">
+                  <label for="postalCode">
+                    Código postal
+                  </label>
+
+                  <input
+                    id="postalCode"
+                    name="postalCode"
+                    type="text"
+                    inputmode="numeric"
+                    autocomplete="postal-code"
+                    maxlength="5"
+                    required
+                  >
+
+                  <small data-error-for="postalCode"></small>
+                </div>
+
+
+                <div class="checkout-field">
+                  <label for="city">
+                    Ciudad / Municipio
+                  </label>
+
+                  <input
+                    id="city"
+                    name="city"
+                    type="text"
+                    autocomplete="address-level2"
+                    maxlength="120"
+                    required
+                  >
+
+                  <small data-error-for="city"></small>
+                </div>
+
+
+                <div class="checkout-field checkout-field-full">
+                  <label for="state">
+                    Estado
+                  </label>
+
+                  <select
+                    id="state"
+                    name="state"
+                    autocomplete="address-level1"
+                    required
+                  >
+                    <option value="">
+                      Selecciona un estado
+                    </option>
+
+                    <option value="Aguascalientes">Aguascalientes</option>
+                    <option value="Baja California">Baja California</option>
+                    <option value="Baja California Sur">Baja California Sur</option>
+                    <option value="Campeche">Campeche</option>
+                    <option value="Chiapas">Chiapas</option>
+                    <option value="Chihuahua">Chihuahua</option>
+                    <option value="Ciudad de México">Ciudad de México</option>
+                    <option value="Coahuila">Coahuila</option>
+                    <option value="Colima">Colima</option>
+                    <option value="Durango">Durango</option>
+                    <option value="Estado de México">Estado de México</option>
+                    <option value="Guanajuato">Guanajuato</option>
+                    <option value="Guerrero">Guerrero</option>
+                    <option value="Hidalgo">Hidalgo</option>
+                    <option value="Jalisco">Jalisco</option>
+                    <option value="Michoacán">Michoacán</option>
+                    <option value="Morelos">Morelos</option>
+                    <option value="Nayarit">Nayarit</option>
+                    <option value="Nuevo León">Nuevo León</option>
+                    <option value="Oaxaca">Oaxaca</option>
+                    <option value="Puebla">Puebla</option>
+                    <option value="Querétaro">Querétaro</option>
+                    <option value="Quintana Roo">Quintana Roo</option>
+                    <option value="San Luis Potosí">San Luis Potosí</option>
+                    <option value="Sinaloa">Sinaloa</option>
+                    <option value="Sonora">Sonora</option>
+                    <option value="Tabasco">Tabasco</option>
+                    <option value="Tamaulipas">Tamaulipas</option>
+                    <option value="Tlaxcala">Tlaxcala</option>
+                    <option value="Veracruz">Veracruz</option>
+                    <option value="Yucatán">Yucatán</option>
+                    <option value="Zacatecas">Zacatecas</option>
+                  </select>
+
+                  <small data-error-for="state"></small>
+                </div>
+
+              </div>
+
+            </section>
+
+
+            <!-- NOTES -->
+
+            <section class="checkout-form-section">
+
+              <div class="checkout-section-heading">
+                <span>03</span>
+
+                <div>
+                  <h2>Indicaciones</h2>
+
+                  <p>
+                    Puedes agregar referencias o
+                    instrucciones para la entrega.
+                  </p>
+                </div>
+              </div>
+
+
+              <div class="checkout-field checkout-field-full">
+
+                <label for="notes">
+                  Notas del pedido
+                  <span>(opcional)</span>
+                </label>
+
+                <textarea
+                  id="notes"
+                  name="notes"
+                  rows="4"
+                  maxlength="500"
+                  placeholder="Ej. referencias para encontrar el domicilio..."
+                ></textarea>
+
+                <small data-error-for="notes"></small>
+
+              </div>
+
+            </section>
+
+
+            <!-- TERMS -->
+
+            <div class="checkout-terms checkout-field">
+
+              <label>
+                <input
+                  type="checkbox"
+                  name="terms"
+                  required
+                >
+
+                <span>
+                  Confirmo que mis datos y mi dirección
+                  de entrega son correctos.
+                </span>
+              </label>
+
+              <small data-error-for="terms"></small>
+
+            </div>
+
+
+            <!-- SUBMIT -->
+
+            <button
+              id="checkoutSubmitButton"
+              class="checkout-submit-button"
+              type="submit"
+            >
+              Continuar al pago
+              <span>→</span>
+            </button>
+
+
+            <div class="checkout-security-note">
+              <span>◇</span>
+
+              <p>
+                Tus datos se utilizan únicamente para
+                procesar y entregar tu pedido.
+              </p>
+            </div>
+
+          </form>
+
+        </section>
+
+
+        <!-- =========================
+             ORDER SUMMARY
+        ========================== -->
+
+        <aside class="checkout-summary">
+
+          <div class="checkout-summary-card">
+
+            <div class="checkout-summary-heading">
+              <div>
+                <span>Tu selección</span>
+                <h2>Resumen del pedido</h2>
+              </div>
+
+              <strong id="checkoutSummaryCount">
+                0
+              </strong>
+            </div>
+
+
+            <div
+              id="checkoutSummaryProducts"
+              class="checkout-summary-products"
+            ></div>
+
+
+            <div class="checkout-summary-totals">
+
+              <div>
+                <span>Subtotal</span>
+
+                <strong id="checkoutSubtotal">
+                  $0
+                </strong>
+              </div>
+
+
+              <div>
+                <span>Envío</span>
+
+                <strong>
+                  Por calcular
+                </strong>
+              </div>
+
+
+              <div class="checkout-summary-total">
+                <span>Total</span>
+
+                <strong id="checkoutTotal">
+                  $0
+                </strong>
+              </div>
+
+            </div>
+
+
+            <div class="checkout-summary-message">
+              <span>DUVANT 12</span>
+
+              <p>
+                La existencia y el precio final se
+                verifican directamente con nuestro
+                inventario al crear tu pedido.
+              </p>
+            </div>
+
+          </div>
+
+        </aside>
+
+      </div>
+
+    </div>
+
+  </main>
+
+
+  <!-- =========================
+       SUCCESS MODAL
+  ========================== -->
+
+  <div
+    id="checkoutReadyOverlay"
+    class="checkout-ready-overlay"
+    hidden
+  >
+
+    <div
+      class="checkout-ready-card"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="checkoutReadyTitle"
+    >
+
+      <div class="checkout-ready-mark">
+        D12
+      </div>
+
+      <span class="checkout-ready-eyebrow">
+        PEDIDO CREADO
+      </span>
+
+      <h2 id="checkoutReadyTitle">
+        Pedido preparado
+      </h2>
+
+      <p>
+        Tu pedido fue creado correctamente.
+      </p>
+
+      <button
+        id="closeReadyModal"
+        type="button"
+        class="store-primary-button"
+      >
+        Entendido
+      </button>
+
+    </div>
+
+  </div>
+
+
+  <!-- =========================
+       TOAST
+  ========================== -->
+
+  <div
+    id="storeToast"
+    class="store-toast"
+    aria-live="polite"
+  ></div>
+
+
+  <!-- =========================
+       SCRIPTS
+  ========================== -->
+
+  <script
+    src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"
+  ></script>
+
+  <script src="supabase-config.js"></script>
+  <script src="store-common.js"></script>
+  <script src="checkout.js"></script>
+
+</body>
+</html>
