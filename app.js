@@ -1296,12 +1296,21 @@ newsletterForm?.addEventListener(
 );
 
 
-checkoutButton?.addEventListener(
+checkoutButton.addEventListener(
   "click",
   () => {
-    store.showToast(
-      "El checkout será nuestra siguiente etapa."
-    );
+    if (
+      store.isCartEmpty()
+    ) {
+      store.showToast(
+        "Tu carrito está vacío."
+      );
+
+      return;
+    }
+
+    window.location.href =
+      "carrito.html";
   }
 );
 
