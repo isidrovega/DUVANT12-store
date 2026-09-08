@@ -1089,62 +1089,102 @@ async function handleSubmit(
     }
 
 
-    /* ========================================
-       BACKEND REJECTED ORDER
-    ======================================== */
+/* ========================================
+   NORMALIZE BACKEND RESPONSE
 
-    if (
-      data.ok !== true
-    ) {
-      const message =
-        getBackendErrorMessage(
-          data.error
-        );
+   Acepta cualquiera de estas respuestas:
 
-      store.showToast(
-        message
-      );
+   1)
+   {
+     ok: true,
+     order: { ... }
+   }
 
-      if (
-        data.error ===
-        "INVENTORY_UNAVAILABLE"
-      ) {
-        window.setTimeout(
-          () => {
-            window.location.href =
-              "carrito.html";
-          },
-          1300
-        );
-      }
+   2)
+   {
+     id: "...",
+     order_number: "...",
+     status: "...",
+     total: 123
+   }
+======================================== */
 
-      return;
-    }
-
-
-    /* ========================================
-       VALIDATE ORDER
-    ======================================== */
-
-    if (
-      !data.order ||
-      !data.order.id ||
-      !data.order.order_number
-    ) {
-      throw new Error(
-        "INVALID_ORDER_RESPONSE"
-      );
-    }
-
-
-    const order =
-      data.order;
-
-
-    console.log(
-      "DUVANT 12 — Pedido creado:",
-      order
+if (
+  data.ok === false
+) {
+  const message =
+    getBackendErrorMessage(
+      data.error
     );
+
+  store.showToast(
+    message
+  );
+
+  if (
+    data.error ===
+    "INVENTORY_UNAVAILABLE"
+  ) {
+    window.setTimeout(
+      () => {
+        window.location.href =
+          "carrito.html";
+      },
+      1300
+    );
+  }
+
+  return;
+}
+
+
+const order =
+  (
+    data.order &&
+    typeof data.order ===
+      "object"
+  )
+    ? data.order
+    : data;
+
+
+/* ========================================
+   VALIDATE ORDER
+======================================== */
+
+if (
+  !order ||
+  !order.id ||
+  !order.order_number
+) {
+  console.error(
+    "Respuesta inesperada de create-order:",
+    data
+  );
+
+  throw new Error(
+    "INVALID_ORDER_RESPONSE"
+  );
+}
+
+
+console.log(
+  "DUVANT 12 — Pedido creado:",
+  order
+);
+
+
+/*
+  NO vaciamos el carrito todavía.
+
+  El carrito se vaciará más adelante
+  únicamente después de confirmar
+  correctamente el pago.
+*/
+
+openReadyModal(
+  order
+);
 
 
     /*
