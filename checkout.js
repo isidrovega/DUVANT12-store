@@ -1091,22 +1091,6 @@ async function handleSubmit(
 
 /* ========================================
    NORMALIZE BACKEND RESPONSE
-
-   Acepta cualquiera de estas respuestas:
-
-   1)
-   {
-     ok: true,
-     order: { ... }
-   }
-
-   2)
-   {
-     id: "...",
-     order_number: "...",
-     status: "...",
-     total: 123
-   }
 ======================================== */
 
 if (
@@ -1138,11 +1122,27 @@ if (
 }
 
 
+/*
+  create-order puede responder:
+
+  {
+    ok: true,
+    order: {...}
+  }
+
+  o directamente:
+
+  {
+    id: "...",
+    order_number: "...",
+    total: ...
+  }
+*/
+
 const order =
   (
     data.order &&
-    typeof data.order ===
-      "object"
+    typeof data.order === "object"
   )
     ? data.order
     : data;
@@ -1158,7 +1158,7 @@ if (
   !order.order_number
 ) {
   console.error(
-    "Respuesta inesperada de create-order:",
+    "DUVANT 12 — Respuesta inesperada de create-order:",
     data
   );
 
@@ -1168,6 +1168,10 @@ if (
 }
 
 
+/* ========================================
+   SUCCESS
+======================================== */
+
 console.log(
   "DUVANT 12 — Pedido creado:",
   order
@@ -1175,29 +1179,15 @@ console.log(
 
 
 /*
-  NO vaciamos el carrito todavía.
+  Todavía NO vaciamos el carrito.
 
-  El carrito se vaciará más adelante
-  únicamente después de confirmar
-  correctamente el pago.
+  Se hará cuando implementemos y
+  confirmemos correctamente el pago.
 */
 
 openReadyModal(
   order
 );
-
-
-    /*
-      NO vaciamos el carrito todavía.
-
-      El carrito se vaciará más adelante
-      únicamente después de confirmar
-      correctamente el pago.
-    */
-
-    openReadyModal(
-      order
-    );
 
   } catch (error) {
     console.error(
