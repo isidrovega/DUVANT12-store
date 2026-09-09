@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>Pedido confirmado | DUVANT12</title>
+
+  <meta
+    name="description"
+    content="Confirmación de pedido DUVANT12."
+  >
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
+    rel="stylesheet"
+  >
+
+  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="store-pages.css">
+  <link rel="stylesheet" href="pedido-confirmado.css">
+</head>
+
+<body class="confirmation-page">
+
+  <main class="confirmation-main">
+    <section class="confirmation-shell">
+
+      <div
+        id="confirmationLoading"
+        class="confirmation-state confirmation-loading"
+        aria-live="polite"
+      >
+        <div class="confirmation-spinner" aria-hidden="true"></div>
+
+        <p class="confirmation-eyebrow">
+          DUVANT12
+        </p>
+
+        <h1>Confirmando tu pedido</h1>
+
+        <p class="confirmation-description">
+          Estamos verificando la información final de tu compra.
+        </p>
+      </div>
+
+      <div
+        id="confirmationSuccess"
+        class="confirmation-state"
+        hidden
+      >
+        <div class="confirmation-icon confirmation-icon-success">
+          <span>✓</span>
+        </div>
+
+        <p class="confirmation-eyebrow">
+          DUVANT12
+        </p>
+
+        <h1>Pago confirmado</h1>
+
+        <p class="confirmation-description">
+          Gracias por tu compra. Hemos recibido correctamente tu pedido.
+        </p>
+
+        <div class="confirmation-order-card">
+
+          <div class="confirmation-row">
+            <span>Pedido</span>
+            <strong id="confirmationOrderNumber">—</strong>
+          </div>
+
+          <div class="confirmation-row">
+            <span>Total</span>
+            <strong id="confirmationTotal">—</strong>
+          </div>
+
+          <div class="confirmation-row">
+            <span>Pago</span>
+            <strong class="confirmation-paid">
+              Confirmado
+            </strong>
+          </div>
+
+          <div class="confirmation-row">
+            <span>Estado</span>
+            <strong id="confirmationStatus">
+              Pedido confirmado
+            </strong>
+          </div>
+
+        </div>
+
+        <div class="confirmation-message">
+          <p>
+            Tu pedido ya fue registrado y el pago fue confirmado.
+          </p>
+
+          <p>
+            Conserva tu número de pedido para cualquier seguimiento.
+          </p>
+        </div>
+
+        <div class="confirmation-actions">
+          <a
+            href="catalogo.html"
+            class="confirmation-button confirmation-button-primary"
+          >
+            Seguir comprando
+          </a>
+
+          <a
+            href="index.html"
+            class="confirmation-button confirmation-button-secondary"
+          >
+            Ir al inicio
+          </a>
+        </div>
+      </div>
+
+      <div
+        id="confirmationPending"
+        class="confirmation-state"
+        hidden
+      >
+        <div class="confirmation-icon confirmation-icon-pending">
+          <span>…</span>
+        </div>
+
+        <p class="confirmation-eyebrow">
+          DUVANT12
+        </p>
+
+        <h1>Estamos confirmando tu pago</h1>
+
+        <p class="confirmation-description">
+          Tu pedido existe, pero la confirmación final todavía está siendo procesada.
+        </p>
+
+        <div class="confirmation-message">
+          <p>
+            No realices otro pago.
+          </p>
+
+          <p>
+            Puedes mantener esta página abierta mientras verificamos automáticamente tu pedido.
+          </p>
+        </div>
+
+        <div class="confirmation-actions">
+          <button
+            id="confirmationRetryButton"
+            class="confirmation-button confirmation-button-primary"
+            type="button"
+          >
+            Verificar nuevamente
+          </button>
+        </div>
+      </div>
+
+      <div
+        id="confirmationError"
+        class="confirmation-state"
+        hidden
+      >
+        <div class="confirmation-icon confirmation-icon-error">
+          <span>!</span>
+        </div>
+
+        <p class="confirmation-eyebrow">
+          DUVANT12
+        </p>
+
+        <h1>No pudimos consultar el pedido</h1>
+
+        <p
+          id="confirmationErrorMessage"
+          class="confirmation-description"
+        >
+          No encontramos la información necesaria para mostrar esta confirmación.
+        </p>
+
+        <div class="confirmation-actions">
+          <a
+            href="index.html"
+            class="confirmation-button confirmation-button-primary"
+          >
+            Ir al inicio
+          </a>
+        </div>
+      </div>
+
+    </section>
+  </main>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="supabase-config.js"></script>
+  <script src="pedido-confirmado.js"></script>
+
+</body>
+</html>
