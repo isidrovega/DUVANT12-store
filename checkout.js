@@ -4,8 +4,7 @@
    DUVANT 12 — CHECKOUT + MERCADO PAGO
 ========================================== */
 
-const store =
-  window.DuvantStore;
+const store = window.DuvantStore;
 
 if (!store) {
   throw new Error(
@@ -33,16 +32,13 @@ const CHECKOUT_REQUEST_KEY =
 const CART_STORAGE_KEY =
   "duvant12_store_cart_v2";
 
+const CONFIRMED_ORDER_KEY =
+  "duvant12_confirmed_order_v1";
+
 
 /* ==========================================
    PAYMENT CONFIRMATION
 ========================================== */
-
-/*
-  Polling inicial:
-  esperamos hasta 30 segundos antes de mostrar
-  el estado "CONFIRMANDO PAGO".
-*/
 
 const ORDER_STATUS_POLL_INTERVAL =
   1500;
@@ -50,45 +46,35 @@ const ORDER_STATUS_POLL_INTERVAL =
 const ORDER_STATUS_POLL_TIMEOUT =
   30000;
 
-
-/*
-  Polling en segundo plano:
-  si Mercado Pago/webhook tarda más de 30s,
-  continuamos verificando mientras la página
-  permanezca abierta.
-*/
-
 const BACKGROUND_POLL_INTERVAL =
   5000;
 
 const BACKGROUND_POLL_TIMEOUT =
   30 * 60 * 1000;
 
+const CONFIRMATION_REDIRECT_DELAY =
+  650;
+
 
 /* ==========================================
    STATE
 ========================================== */
 
-let activeOrder =
-  null;
+let activeOrder = null;
 
-let activeOrderClientRequestId =
-  null;
+let activeOrderClientRequestId = null;
 
-let mercadoPago =
-  null;
+let mercadoPago = null;
 
-let creatingOrder =
-  false;
+let creatingOrder = false;
 
-let paymentConfirmationIsRunning =
-  false;
+let paymentConfirmationIsRunning = false;
 
-let backgroundPaymentMonitorIsRunning =
-  false;
+let backgroundPaymentMonitorIsRunning = false;
 
-let paymentWasConfirmed =
-  false;
+let paymentWasConfirmed = false;
+
+let confirmationRedirectScheduled = false;
 
 
 /* ==========================================
@@ -260,24 +246,19 @@ function scrollToElement(element) {
   }
 
   element.scrollIntoView({
-    behavior:
-      "smooth",
-
-    block:
-      "start"
+    behavior: "smooth",
+    block: "start"
   });
 }
 
 
 function wait(milliseconds) {
-  return new Promise(
-    resolve => {
-      window.setTimeout(
-        resolve,
-        milliseconds
-      );
-    }
-  );
+  return new Promise(resolve => {
+    window.setTimeout(
+      resolve,
+      milliseconds
+    );
+  });
 }
 
 
@@ -353,6 +334,86 @@ function getCheckoutRequestId() {
 function resetCheckoutRequestId() {
   localStorage.removeItem(
     CHECKOUT_REQUEST_KEY
+  );
+}
+
+
+/* ==========================================
+   CONFIRMATION PAGE DATA
+========================================== */
+
+function saveConfirmedOrderForRedirect(
+  order
+) {
+  const orderId =
+    sanitizeText(
+      order?.id
+    );
+
+  const clientRequestId =
+    sanitizeText(
+      activeOrderClientRequestId
+    );
+
+  if (
+    !orderId ||
+    !clientRequestId
+  ) {
+    console.error(
+      "DUVANT 12 — No fue posible guardar la confirmación del pedido:",
+      {
+        order_id: orderId,
+        has_client_request_id:
+          Boolean(
+            clientRequestId
+          )
+      }
+    );
+
+    return false;
+  }
+
+  try {
+    sessionStorage.setItem(
+      CONFIRMED_ORDER_KEY,
+      JSON.stringify({
+        order_id:
+          orderId,
+
+        client_request_id:
+          clientRequestId
+      })
+    );
+
+    return true;
+
+  } catch (error) {
+    console.error(
+      "DUVANT 12 — Error guardando datos de confirmación:",
+      error
+    );
+
+    return false;
+  }
+}
+
+
+function redirectToConfirmationPage() {
+  if (
+    confirmationRedirectScheduled
+  ) {
+    return;
+  }
+
+  confirmationRedirectScheduled =
+    true;
+
+  window.setTimeout(
+    () => {
+      window.location.href =
+        "pedido-confirmado.html";
+    },
+    CONFIRMATION_REDIRECT_DELAY
   );
 }
 
@@ -503,7 +564,6 @@ function createSummaryItem(item) {
 
       </div>
 
-
       <div class="checkout-summary-product-info">
 
         <small>
@@ -525,7 +585,6 @@ function createSummaryItem(item) {
         </span>
 
       </div>
-
 
       <strong class="checkout-summary-product-price">
         ${store.formatCurrency(
@@ -583,24 +642,20 @@ function clearFieldErrors() {
     .querySelectorAll(
       ".checkout-field.invalid"
     )
-    .forEach(
-      field => {
-        field.classList.remove(
-          "invalid"
-        );
-      }
-    );
+    .forEach(field => {
+      field.classList.remove(
+        "invalid"
+      );
+    });
 
   checkoutForm
     .querySelectorAll(
       "[data-error-for]"
     )
-    .forEach(
-      element => {
-        element.textContent =
-          "";
-      }
-    );
+    .forEach(element => {
+      element.textContent =
+        "";
+    });
 }
 
 
@@ -846,7 +901,6 @@ function validateForm(data) {
       field.scrollIntoView({
         behavior:
           "smooth",
-
         block:
           "center"
       });
@@ -1017,12 +1071,10 @@ function lockCustomerForm() {
     .querySelectorAll(
       "input, select, textarea, button"
     )
-    .forEach(
-      element => {
-        element.disabled =
-          true;
-      }
-    );
+    .forEach(element => {
+      element.disabled =
+        true;
+    });
 
   checkoutForm.classList.add(
     "checkout-customer-locked"
@@ -1278,11 +1330,9 @@ async function waitForPaymentConfirmation(
         continue;
       }
 
-
       logOrderStatus(
         currentOrder
       );
-
 
       if (
         orderIsPaid(
@@ -1291,7 +1341,6 @@ async function waitForPaymentConfirmation(
       ) {
         return currentOrder;
       }
-
 
       if (
         orderPaymentFailed(
@@ -1303,12 +1352,10 @@ async function waitForPaymentConfirmation(
         );
       }
 
-
       await wait(
         ORDER_STATUS_POLL_INTERVAL
       );
     }
-
 
     throw new Error(
       "PAYMENT_CONFIRMATION_TIMEOUT"
@@ -1326,21 +1373,15 @@ async function waitForPaymentConfirmation(
 ========================================== */
 
 function clearCheckoutAfterPayment() {
-  /*
-    Este método únicamente debe ejecutarse
-    después de confirmar desde Store:
-
-    status = paid
-    payment_status = paid
-  */
-
   localStorage.removeItem(
     CART_STORAGE_KEY
   );
 
+  localStorage.removeItem(
+    CHECKOUT_DRAFT_KEY
+  );
 
   resetCheckoutRequestId();
-
 
   if (
     typeof store.updateCartIndicators ===
@@ -1348,7 +1389,6 @@ function clearCheckoutAfterPayment() {
   ) {
     store.updateCartIndicators();
   }
-
 
   window.dispatchEvent(
     new CustomEvent(
@@ -1376,12 +1416,10 @@ function openPaymentResultModal(
       mercadoPagoResult?.status_detail
     ).toLowerCase();
 
-
   if (checkoutReadyEyebrow) {
     checkoutReadyEyebrow.textContent =
       "PAGO ENVIADO";
   }
-
 
   if (
     status === "approved" ||
@@ -1413,10 +1451,8 @@ function openPaymentResultModal(
       "La solicitud de pago fue enviada a Mercado Pago. Estamos esperando la confirmación definitiva de la operación.";
   }
 
-
   checkoutReadyOverlay.hidden =
     false;
-
 
   requestAnimationFrame(
     () => {
@@ -1425,7 +1461,6 @@ function openPaymentResultModal(
       );
     }
   );
-
 
   document.body.classList.add(
     "no-scroll"
@@ -1441,18 +1476,14 @@ function showConfirmedPaymentModal(
       "PAGO CONFIRMADO";
   }
 
-
   checkoutReadyTitle.textContent =
     `Pedido ${order.order_number}`;
 
-
   checkoutReadyParagraph.textContent =
-    "Tu pago fue confirmado correctamente. Gracias por tu compra en DUVANT 12.";
-
+    "Tu pago fue confirmado correctamente. Estamos abriendo la confirmación de tu pedido.";
 
   checkoutReadyOverlay.hidden =
     false;
-
 
   requestAnimationFrame(
     () => {
@@ -1461,7 +1492,6 @@ function showConfirmedPaymentModal(
       );
     }
   );
-
 
   document.body.classList.add(
     "no-scroll"
@@ -1477,18 +1507,14 @@ function showPendingConfirmationModal(
       "CONFIRMANDO PAGO";
   }
 
-
   checkoutReadyTitle.textContent =
     `Pedido ${order.order_number}`;
-
 
   checkoutReadyParagraph.textContent =
     "Mercado Pago recibió la operación, pero la confirmación está tardando más de lo esperado. No realices otro pago. Seguiremos verificando automáticamente tu pedido.";
 
-
   checkoutReadyOverlay.hidden =
     false;
-
 
   requestAnimationFrame(
     () => {
@@ -1497,7 +1523,6 @@ function showPendingConfirmationModal(
       );
     }
   );
-
 
   document.body.classList.add(
     "no-scroll"
@@ -1513,18 +1538,14 @@ function showFailedPaymentModal(
       "PAGO NO CONFIRMADO";
   }
 
-
   checkoutReadyTitle.textContent =
     `Pedido ${order.order_number}`;
-
 
   checkoutReadyParagraph.textContent =
     "Mercado Pago no pudo confirmar el pago. No se realizará otro cobro automáticamente.";
 
-
   checkoutReadyOverlay.hidden =
     false;
-
 
   requestAnimationFrame(
     () => {
@@ -1533,7 +1554,6 @@ function showFailedPaymentModal(
       );
     }
   );
-
 
   document.body.classList.add(
     "no-scroll"
@@ -1546,11 +1566,9 @@ function closeReadyModalWindow() {
     "open"
   );
 
-
   document.body.classList.remove(
     "no-scroll"
   );
-
 
   window.setTimeout(
     () => {
@@ -1569,42 +1587,57 @@ function closeReadyModalWindow() {
 function handleConfirmedPayment(
   confirmedOrder
 ) {
-  /*
-    Evita limpiar dos veces el carrito si,
-    por cualquier razón, dos consultas llegan
-    casi simultáneamente.
-  */
-
   if (paymentWasConfirmed) {
     return;
   }
 
-
   paymentWasConfirmed =
     true;
-
 
   console.log(
     "DUVANT 12 — Pago confirmado por backend:",
     confirmedOrder
   );
 
+  /*
+    Primero guardamos el ID del pedido y
+    client_request_id ANTES de limpiar
+    localStorage.
+  */
+
+  const confirmationSaved =
+    saveConfirmedOrderForRedirect(
+      confirmedOrder
+    );
 
   /*
-    Solamente ahora se vacía el carrito.
+    Únicamente ahora vaciamos carrito,
+    borrador y request ID.
   */
 
   clearCheckoutAfterPayment();
 
-
   /*
-    Cambiamos automáticamente el modal a:
-    PAGO CONFIRMADO
+    Mostramos confirmación visual breve.
   */
 
   showConfirmedPaymentModal(
     confirmedOrder
   );
+
+  /*
+    Si la información necesaria para
+    pedido-confirmado.html fue guardada,
+    redirigimos automáticamente.
+  */
+
+  if (confirmationSaved) {
+    redirectToConfirmationPage();
+  } else {
+    console.error(
+      "DUVANT 12 — Pago confirmado, pero no se pudo preparar la redirección."
+    );
+  }
 }
 
 
@@ -1622,25 +1655,15 @@ async function startBackgroundPaymentMonitor(
     return;
   }
 
-
   backgroundPaymentMonitorIsRunning =
     true;
-
-
-  /*
-    Conservamos el request ID original del
-    pedido. No dependemos de que permanezca
-    posteriormente en localStorage.
-  */
 
   const clientRequestId =
     activeOrderClientRequestId ||
     getCheckoutRequestId();
 
-
   const startedAt =
     Date.now();
-
 
   console.log(
     "DUVANT 12 — Iniciando confirmación de pago en segundo plano:",
@@ -1653,7 +1676,6 @@ async function startBackgroundPaymentMonitor(
     }
   );
 
-
   try {
     while (
       !paymentWasConfirmed &&
@@ -1663,7 +1685,6 @@ async function startBackgroundPaymentMonitor(
     ) {
       let currentOrder;
 
-
       try {
         currentOrder =
           await getOrderStatus(
@@ -1672,34 +1693,21 @@ async function startBackgroundPaymentMonitor(
           );
 
       } catch (error) {
-        /*
-          Un problema temporal de conexión
-          no debe detener la recuperación.
-        */
-
         console.warn(
           "DUVANT 12 — Consulta de pago en segundo plano falló temporalmente:",
           error
         );
 
-
         await wait(
           BACKGROUND_POLL_INTERVAL
         );
 
-
         continue;
       }
-
 
       logOrderStatus(
         currentOrder
       );
-
-
-      /* ======================================
-         PAID
-      ====================================== */
 
       if (
         orderIsPaid(
@@ -1713,11 +1721,6 @@ async function startBackgroundPaymentMonitor(
         return;
       }
 
-
-      /* ======================================
-         FAILED / CANCELLED
-      ====================================== */
-
       if (
         orderPaymentFailed(
           currentOrder
@@ -1728,34 +1731,21 @@ async function startBackgroundPaymentMonitor(
           currentOrder
         );
 
-
         showFailedPaymentModal(
           currentOrder
         );
-
 
         showPaymentError(
           "Mercado Pago no pudo confirmar el pago."
         );
 
-
         return;
       }
-
 
       await wait(
         BACKGROUND_POLL_INTERVAL
       );
     }
-
-
-    /*
-      Después de 30 minutos dejamos de hacer
-      polling desde esta página.
-
-      No marcamos el pago como fallido y
-      tampoco vaciamos el carrito.
-    */
 
     if (
       !paymentWasConfirmed
@@ -1792,27 +1782,19 @@ async function confirmPaymentAfterSubmission(
         order
       );
 
-
     if (!confirmedOrder) {
       return;
     }
 
-
     handleConfirmedPayment(
       confirmedOrder
     );
-
 
   } catch (error) {
     console.error(
       "Confirmación del pago:",
       error
     );
-
-
-    /* ======================================
-       PAYMENT FAILED
-    ====================================== */
 
     if (
       error?.message ===
@@ -1822,65 +1804,35 @@ async function confirmPaymentAfterSubmission(
         order
       );
 
-
       showPaymentError(
         "Mercado Pago no pudo confirmar el pago."
       );
 
-
       return;
     }
-
-
-    /* ======================================
-       INITIAL 30s TIMEOUT
-    ====================================== */
 
     if (
       error?.message ===
         "PAYMENT_CONFIRMATION_TIMEOUT"
     ) {
-      /*
-        IMPORTANTE:
-
-        No vaciamos el carrito.
-
-        No marcamos el pago como fallido.
-
-        No intentamos otro cobro.
-
-        Mostramos "CONFIRMANDO PAGO" y
-        continuamos verificando en segundo
-        plano.
-      */
-
       showPendingConfirmationModal(
         order
       );
-
 
       void startBackgroundPaymentMonitor(
         order
       );
 
-
       return;
     }
-
-
-    /* ======================================
-       OTHER ERROR
-    ====================================== */
 
     showPaymentError(
       "No pudimos consultar temporalmente la confirmación del pago. Seguiremos verificando tu pedido."
     );
 
-
     showPendingConfirmationModal(
       order
     );
-
 
     void startBackgroundPaymentMonitor(
       order
@@ -1902,19 +1854,16 @@ async function processMercadoPagoPayment(
     );
   }
 
-
   const token =
     sanitizeText(
       formData?.token
     );
-
 
   const paymentMethodId =
     sanitizeText(
       formData?.payment_method_id ||
       formData?.paymentMethodId
     );
-
 
   const installments =
     Math.max(
@@ -1925,20 +1874,17 @@ async function processMercadoPagoPayment(
       )
     );
 
-
   if (!token) {
     throw new Error(
       "CARD_TOKEN_MISSING"
     );
   }
 
-
   if (!paymentMethodId) {
     throw new Error(
       "PAYMENT_METHOD_MISSING"
     );
   }
-
 
   const requestBody = {
     order_id:
@@ -1957,7 +1903,6 @@ async function processMercadoPagoPayment(
       installments
   };
 
-
   console.log(
     "DUVANT 12 — Enviando pago:",
     {
@@ -1971,7 +1916,6 @@ async function processMercadoPagoPayment(
         installments
     }
   );
-
 
   const {
     data,
@@ -1987,19 +1931,16 @@ async function processMercadoPagoPayment(
         }
       );
 
-
   if (error) {
     console.error(
       "create-mp-order:",
       error
     );
 
-
     throw new Error(
       "MP_FUNCTION_ERROR"
     );
   }
-
 
   if (
     !data ||
@@ -2011,7 +1952,6 @@ async function processMercadoPagoPayment(
     );
   }
 
-
   if (
     data.ok !== true
   ) {
@@ -2020,7 +1960,6 @@ async function processMercadoPagoPayment(
       data
     );
 
-
     throw new Error(
       sanitizeText(
         data.error
@@ -2028,7 +1967,6 @@ async function processMercadoPagoPayment(
       "MP_PAYMENT_ERROR"
     );
   }
-
 
   return data;
 }
@@ -2045,9 +1983,7 @@ async function initializeMercadoPago(
   checkoutPaymentLoading.hidden =
     false;
 
-
   clearPaymentError();
-
 
   if (
     typeof window.MercadoPago !==
@@ -2058,16 +1994,13 @@ async function initializeMercadoPago(
     );
   }
 
-
   const publicKey =
     await getMercadoPagoPublicKey();
-
 
   const amount =
     Number(
       order.total
     );
-
 
   if (
     !Number.isFinite(
@@ -2079,13 +2012,6 @@ async function initializeMercadoPago(
       "INVALID_ORDER_TOTAL"
     );
   }
-
-
-  /*
-    Si hubiera quedado un Brick montado
-    anteriormente, lo destruimos antes
-    de crear uno nuevo.
-  */
 
   if (
     window.cardPaymentBrickController &&
@@ -2107,10 +2033,8 @@ async function initializeMercadoPago(
     }
   }
 
-
   cardPaymentBrickContainer.innerHTML =
     "";
-
 
   mercadoPago =
     new window.MercadoPago(
@@ -2121,16 +2045,10 @@ async function initializeMercadoPago(
       }
     );
 
-
   const bricksBuilder =
     mercadoPago.bricks();
 
-
   const settings = {
-
-    /* ======================================
-       ORDER DATA
-    ====================================== */
 
     initialization: {
       amount:
@@ -2141,11 +2059,6 @@ async function initializeMercadoPago(
           customerData.email
       }
     },
-
-
-    /* ======================================
-       DUVANT 12 VISUAL
-    ====================================== */
 
     customization: {
 
@@ -2223,7 +2136,6 @@ async function initializeMercadoPago(
           }
         },
 
-
         texts: {
 
           formTitle:
@@ -2272,17 +2184,11 @@ async function initializeMercadoPago(
         }
       },
 
-
       paymentMethods: {
         minInstallments:
           1
       }
     },
-
-
-    /* ======================================
-       CALLBACKS
-    ====================================== */
 
     callbacks: {
 
@@ -2291,21 +2197,17 @@ async function initializeMercadoPago(
           checkoutPaymentLoading.hidden =
             true;
 
-
           clearPaymentError();
-
 
           console.log(
             "DUVANT 12 — Card Payment Brick listo."
           );
         },
 
-
       onSubmit:
         async formData => {
 
           clearPaymentError();
-
 
           try {
             const result =
@@ -2313,31 +2215,17 @@ async function initializeMercadoPago(
                 formData
               );
 
-
             console.log(
               "DUVANT 12 — Resultado Mercado Pago:",
               result
             );
 
-
             const submittedOrder =
               result.order ||
               activeOrder;
 
-
-            /*
-              Conservamos el pedido más reciente
-              devuelto por backend.
-            */
-
             activeOrder =
               submittedOrder;
-
-
-            /*
-              Primera etapa visual:
-              Mercado Pago recibió el pago.
-            */
 
             openPaymentResultModal(
               submittedOrder,
@@ -2345,21 +2233,11 @@ async function initializeMercadoPago(
                 {}
             );
 
-
-            /*
-              El Brick termina su submit.
-
-              La confirmación continúa de forma
-              asíncrona mediante get-order-status.
-            */
-
             void confirmPaymentAfterSubmission(
               submittedOrder
             );
 
-
             return Promise.resolve();
-
 
           } catch (error) {
             console.error(
@@ -2367,10 +2245,8 @@ async function initializeMercadoPago(
               error
             );
 
-
             let message =
               "No fue posible procesar el pago. Revisa los datos de tu tarjeta e inténtalo nuevamente.";
-
 
             if (
               error?.message ===
@@ -2379,7 +2255,6 @@ async function initializeMercadoPago(
               message =
                 "Mercado Pago no pudo procesar la operación en este momento.";
             }
-
 
             if (
               error?.message ===
@@ -2391,23 +2266,19 @@ async function initializeMercadoPago(
                 "Revisa los datos de tu tarjeta antes de continuar.";
             }
 
-
             showPaymentError(
               message
             );
 
-
             store.showToast(
               "No fue posible procesar el pago."
             );
-
 
             return Promise.reject(
               error
             );
           }
         },
-
 
       onError:
         error => {
@@ -2417,10 +2288,8 @@ async function initializeMercadoPago(
             error
           );
 
-
           checkoutPaymentLoading.hidden =
             true;
-
 
           showPaymentError(
             "Ocurrió un problema con el formulario seguro de Mercado Pago."
@@ -2428,7 +2297,6 @@ async function initializeMercadoPago(
         }
     }
   };
-
 
   window.cardPaymentBrickController =
     await bricksBuilder.create(
@@ -2450,24 +2318,16 @@ async function showPaymentStage(
   activeOrder =
     order;
 
-
   /*
-    Guardamos el request ID exacto asociado
-    al pedido.
-
-    Esto es importante porque después de un
-    pago confirmado eliminaremos el valor de
-    localStorage, pero los procesos de polling
-    ya conservarán esta copia.
+    Guardamos el request ID exacto de este
+    pedido antes de cualquier limpieza.
   */
 
   activeOrderClientRequestId =
     getCheckoutRequestId();
 
-
   checkoutPaymentOrderNumber.textContent =
     order.order_number;
-
 
   checkoutPaymentTotal.textContent =
     store.formatCurrency(
@@ -2476,18 +2336,14 @@ async function showPaymentStage(
       )
     );
 
-
   checkoutPaymentSection.hidden =
     false;
 
-
   lockCustomerForm();
-
 
   scrollToElement(
     checkoutPaymentSection
   );
-
 
   try {
     await initializeMercadoPago(
@@ -2501,10 +2357,8 @@ async function showPaymentStage(
       error
     );
 
-
     checkoutPaymentLoading.hidden =
       true;
-
 
     showPaymentError(
       "No fue posible iniciar Mercado Pago. Actualiza la página e inténtalo nuevamente."
@@ -2525,12 +2379,10 @@ async function createStoreOrder(
       customerData
     );
 
-
   console.log(
     "DUVANT 12 — Enviando pedido:",
     requestBody
   );
-
 
   const {
     data,
@@ -2546,17 +2398,14 @@ async function createStoreOrder(
         }
       );
 
-
   if (error) {
     console.error(
       "Error invocando create-order:",
       error
     );
 
-
     throw error;
   }
-
 
   if (
     !data ||
@@ -2568,7 +2417,6 @@ async function createStoreOrder(
     );
   }
 
-
   if (
     data.ok === false
   ) {
@@ -2577,11 +2425,9 @@ async function createStoreOrder(
         data.error
       );
 
-
     store.showToast(
       message
     );
-
 
     if (
       data.error ===
@@ -2596,10 +2442,8 @@ async function createStoreOrder(
       );
     }
 
-
     return null;
   }
-
 
   const order =
     (
@@ -2609,7 +2453,6 @@ async function createStoreOrder(
     )
       ? data.order
       : data;
-
 
   if (
     !order ||
@@ -2621,12 +2464,10 @@ async function createStoreOrder(
       data
     );
 
-
     throw new Error(
       "INVALID_ORDER_RESPONSE"
     );
   }
-
 
   return order;
 }
@@ -2641,7 +2482,6 @@ async function handleSubmit(
 ) {
   event.preventDefault();
 
-
   if (
     creatingOrder ||
     activeOrder
@@ -2649,10 +2489,8 @@ async function handleSubmit(
     return;
   }
 
-
   const customerData =
     getFormData();
-
 
   if (
     !validateForm(
@@ -2663,14 +2501,11 @@ async function handleSubmit(
       "Revisa los campos marcados."
     );
 
-
     return;
   }
 
-
   const initialItems =
     store.getCartItems();
-
 
   if (
     !initialItems.length
@@ -2679,37 +2514,26 @@ async function handleSubmit(
       "Tu carrito está vacío."
     );
 
-
     return;
   }
-
 
   creatingOrder =
     true;
 
-
   checkoutSubmitButton.disabled =
     true;
-
 
   checkoutSubmitButton.innerHTML = `
     Preparando pago...
     <span>···</span>
   `;
 
-
   try {
-
-    /* ========================================
-       REFRESH CATALOG
-    ======================================== */
 
     await store.loadProducts();
 
-
     const refreshedItems =
       store.getCartItems();
-
 
     if (
       !refreshedItems.length
@@ -2717,7 +2541,6 @@ async function handleSubmit(
       store.showToast(
         "Tu carrito ya no contiene productos disponibles."
       );
-
 
       window.setTimeout(
         () => {
@@ -2727,14 +2550,8 @@ async function handleSubmit(
         900
       );
 
-
       return;
     }
-
-
-    /* ========================================
-       AVAILABILITY
-    ======================================== */
 
     if (
       !store.cartIsAvailable()
@@ -2742,7 +2559,6 @@ async function handleSubmit(
       store.showToast(
         "La disponibilidad de tu carrito cambió."
       );
-
 
       window.setTimeout(
         () => {
@@ -2752,50 +2568,31 @@ async function handleSubmit(
         1000
       );
 
-
       return;
     }
-
-
-    /* ========================================
-       SAVE DRAFT
-    ======================================== */
 
     saveDraft(
       customerData
     );
-
-
-    /* ========================================
-       CREATE / GET IDEMPOTENT ORDER
-    ======================================== */
 
     const order =
       await createStoreOrder(
         customerData
       );
 
-
     if (!order) {
       return;
     }
-
 
     console.log(
       "DUVANT 12 — Pedido reservado:",
       order
     );
 
-
-    /* ========================================
-       START PAYMENT
-    ======================================== */
-
     await showPaymentStage(
       order,
       customerData
     );
-
 
   } catch (error) {
     console.error(
@@ -2803,21 +2600,17 @@ async function handleSubmit(
       error
     );
 
-
     store.showToast(
       "No fue posible preparar el pedido. Inténtalo nuevamente."
     );
-
 
   } finally {
     creatingOrder =
       false;
 
-
     if (!activeOrder) {
       checkoutSubmitButton.disabled =
         false;
-
 
       checkoutSubmitButton.innerHTML = `
         Continuar al pago
@@ -2837,10 +2630,8 @@ function saveCurrentDraft() {
     return;
   }
 
-
   const data =
     getFormData();
-
 
   saveDraft(
     data
@@ -2865,23 +2656,19 @@ checkoutForm.addEventListener(
       return;
     }
 
-
     const field =
       event.target;
-
 
     const wrapper =
       field.closest(
         ".checkout-field"
       );
 
-
     if (wrapper) {
       wrapper.classList.remove(
         "invalid"
       );
     }
-
 
     if (
       field.name
@@ -2891,13 +2678,11 @@ checkoutForm.addEventListener(
           `[data-error-for="${field.name}"]`
         );
 
-
       if (errorElement) {
         errorElement.textContent =
           "";
       }
     }
-
 
     saveCurrentDraft();
   }
@@ -2911,10 +2696,8 @@ checkoutForm.addEventListener(
       return;
     }
 
-
     const field =
       event.target;
-
 
     if (
       field.name
@@ -2924,13 +2707,11 @@ checkoutForm.addEventListener(
           `[data-error-for="${field.name}"]`
         );
 
-
       if (errorElement) {
         errorElement.textContent =
           "";
       }
     }
-
 
     saveCurrentDraft();
   }
@@ -3023,6 +2804,18 @@ async function initializeCheckout() {
     paymentWasConfirmed =
       false;
 
+    confirmationRedirectScheduled =
+      false;
+
+    /*
+      Limpiamos cualquier confirmación vieja.
+      Solamente una compra nueva confirmada
+      puede volver a crear este valor.
+    */
+
+    sessionStorage.removeItem(
+      CONFIRMED_ORDER_KEY
+    );
 
     checkoutLoading.hidden =
       false;
@@ -3039,41 +2832,22 @@ async function initializeCheckout() {
     checkoutPaymentSection.hidden =
       true;
 
-
-    /* ========================================
-       LOAD LIVE INVENTORY
-    ======================================== */
-
     await store.loadProducts();
-
 
     const items =
       store.getCartItems();
-
-
-    /* ========================================
-       EMPTY
-    ======================================== */
 
     if (!items.length) {
       checkoutLoading.hidden =
         true;
 
-
       checkoutEmpty.hidden =
         false;
 
-
       resetCheckoutRequestId();
-
 
       return;
     }
-
-
-    /* ========================================
-       AVAILABILITY
-    ======================================== */
 
     if (
       !store.cartIsAvailable()
@@ -3081,11 +2855,9 @@ async function initializeCheckout() {
       checkoutLoading.hidden =
         true;
 
-
       store.showToast(
         "La disponibilidad de tu carrito cambió."
       );
-
 
       window.setTimeout(
         () => {
@@ -3095,47 +2867,31 @@ async function initializeCheckout() {
         900
       );
 
-
       return;
     }
 
-
-    /* ========================================
-       RENDER
-    ======================================== */
-
     renderSummary();
 
-
     populateDraft();
-
 
     /*
       Nueva entrada al checkout =
       nueva intención de compra.
-
-      Durante esta misma ejecución,
-      create-order seguirá usando exactamente
-      este request ID.
     */
 
     createNewCheckoutRequestId();
 
-
     checkoutLoading.hidden =
       true;
 
-
     checkoutContent.hidden =
       false;
-
 
   } catch (error) {
     console.error(
       "Error inicializando checkout:",
       error
     );
-
 
     checkoutLoading.hidden =
       true;
