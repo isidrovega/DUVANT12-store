@@ -25,6 +25,273 @@
 
   <link rel="stylesheet" href="styles.css">
   <link rel="stylesheet" href="store-pages.css">
+
+  <style>
+    /* ==========================================
+       DUVANT 12 — MERCADO PAGO
+       Extensión visual del checkout existente
+    ========================================== */
+
+    .checkout-payment-section[hidden] {
+      display: none !important;
+    }
+
+    .checkout-payment-section {
+      margin-top: 28px;
+      padding: 26px;
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      background:
+        linear-gradient(
+          145deg,
+          rgba(255, 255, 255, 0.035),
+          rgba(255, 255, 255, 0.012)
+        );
+    }
+
+    .checkout-payment-order {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 18px;
+      margin-bottom: 26px;
+      padding-bottom: 20px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .checkout-payment-order span {
+      display: block;
+      margin-bottom: 5px;
+      color: rgba(255, 255, 255, 0.48);
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+    }
+
+    .checkout-payment-order strong {
+      color: #f3f3f3;
+      font-size: 15px;
+      font-weight: 600;
+    }
+
+    .checkout-payment-order-total {
+      text-align: right;
+    }
+
+    .checkout-payment-order-total strong {
+      font-size: 18px;
+    }
+
+    .checkout-payment-form {
+      display: block;
+    }
+
+    .checkout-payment-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 18px;
+    }
+
+    .checkout-payment-field {
+      min-width: 0;
+    }
+
+    .checkout-payment-field-full {
+      grid-column: 1 / -1;
+    }
+
+    .checkout-payment-field label {
+      display: block;
+      margin-bottom: 8px;
+      color: rgba(255, 255, 255, 0.74);
+      font-size: 12px;
+      font-weight: 500;
+    }
+
+    .checkout-payment-secure-field,
+    .checkout-payment-field input,
+    .checkout-payment-field select {
+      box-sizing: border-box;
+      width: 100%;
+      min-height: 48px;
+      border: 1px solid rgba(255, 255, 255, 0.14);
+      border-radius: 0;
+      outline: none;
+      background: rgba(0, 0, 0, 0.32);
+      color: #f4f4f4;
+      font-family: "Inter", sans-serif;
+      font-size: 14px;
+      transition:
+        border-color 160ms ease,
+        background-color 160ms ease;
+    }
+
+    .checkout-payment-field input,
+    .checkout-payment-field select {
+      padding: 0 14px;
+    }
+
+    .checkout-payment-secure-field {
+      position: relative;
+      overflow: hidden;
+      padding: 0 12px;
+    }
+
+    .checkout-payment-secure-field iframe {
+      width: 100% !important;
+      height: 46px !important;
+    }
+
+    .checkout-payment-field input:focus,
+    .checkout-payment-field select:focus,
+    .checkout-payment-secure-field:focus-within {
+      border-color: rgba(255, 255, 255, 0.42);
+      background: rgba(255, 255, 255, 0.035);
+    }
+
+    .checkout-payment-field select {
+      color-scheme: dark;
+      cursor: pointer;
+    }
+
+    .checkout-payment-field select option {
+      background: #101010;
+      color: #f5f5f5;
+    }
+
+    .checkout-payment-field input::placeholder {
+      color: rgba(255, 255, 255, 0.34);
+    }
+
+    .checkout-payment-hidden-email {
+      position: absolute !important;
+      width: 1px !important;
+      height: 1px !important;
+      padding: 0 !important;
+      margin: -1px !important;
+      overflow: hidden !important;
+      clip: rect(0, 0, 0, 0) !important;
+      white-space: nowrap !important;
+      border: 0 !important;
+    }
+
+    .checkout-payment-security {
+      display: flex;
+      gap: 10px;
+      align-items: flex-start;
+      margin-top: 20px;
+      padding: 14px 16px;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      background: rgba(255, 255, 255, 0.018);
+    }
+
+    .checkout-payment-security span {
+      flex: 0 0 auto;
+      color: #c7c7c7;
+      font-size: 15px;
+    }
+
+    .checkout-payment-security p {
+      margin: 0;
+      color: rgba(255, 255, 255, 0.5);
+      font-size: 12px;
+      line-height: 1.6;
+    }
+
+    .checkout-payment-button {
+      width: 100%;
+      margin-top: 20px;
+      min-height: 54px;
+      border: 1px solid #d4d4d4;
+      background:
+        linear-gradient(
+          180deg,
+          #eeeeee 0%,
+          #c9c9c9 100%
+        );
+      color: #090909;
+      font-family: "Inter", sans-serif;
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: 0.05em;
+      cursor: pointer;
+      transition:
+        transform 150ms ease,
+        opacity 150ms ease,
+        background 150ms ease;
+    }
+
+    .checkout-payment-button:hover:not(:disabled) {
+      background:
+        linear-gradient(
+          180deg,
+          #ffffff 0%,
+          #d8d8d8 100%
+        );
+    }
+
+    .checkout-payment-button:active:not(:disabled) {
+      transform: translateY(1px);
+    }
+
+    .checkout-payment-button:disabled {
+      opacity: 0.55;
+      cursor: wait;
+    }
+
+    .checkout-payment-progress {
+      display: none;
+    }
+
+    .checkout-payment-error {
+      display: none;
+      margin-top: 14px;
+      padding: 12px 14px;
+      border: 1px solid rgba(255, 97, 97, 0.24);
+      background: rgba(160, 22, 22, 0.08);
+      color: #e8baba;
+      font-size: 12px;
+      line-height: 1.55;
+    }
+
+    .checkout-payment-error.visible {
+      display: block;
+    }
+
+    .checkout-payment-loading {
+      color: rgba(255, 255, 255, 0.48);
+      font-size: 12px;
+      line-height: 1.6;
+    }
+
+    .checkout-customer-locked {
+      pointer-events: none;
+      opacity: 0.58;
+    }
+
+    @media (max-width: 640px) {
+      .checkout-payment-section {
+        padding: 20px 16px;
+      }
+
+      .checkout-payment-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .checkout-payment-field-full {
+        grid-column: auto;
+      }
+
+      .checkout-payment-order {
+        align-items: flex-start;
+        flex-direction: column;
+      }
+
+      .checkout-payment-order-total {
+        text-align: left;
+      }
+    }
+  </style>
 </head>
 
 <body>
@@ -145,9 +412,7 @@
 
           <div class="checkout-breadcrumb">
             <a href="carrito.html">Carrito</a>
-
             <span>/</span>
-
             <strong>Checkout</strong>
           </div>
 
@@ -168,6 +433,10 @@
           </div>
 
 
+          <!-- =========================
+               CUSTOMER FORM
+          ========================== -->
+
           <form
             id="checkoutForm"
             class="checkout-form"
@@ -183,6 +452,7 @@
 
                 <div>
                   <h2>Información de contacto</h2>
+
                   <p>
                     Utilizaremos estos datos para
                     mantenerte informado sobre tu pedido.
@@ -481,27 +751,29 @@
 
             <div class="checkout-terms checkout-field">
 
-             <label for="terms">
-  <input
-    id="terms"
-    type="checkbox"
-    name="terms"
-    value="on"
-    required
-  >
+              <label for="terms">
 
-  <span>
-    Confirmo que mis datos y mi dirección
-    de entrega son correctos.
-  </span>
-</label>
+                <input
+                  id="terms"
+                  type="checkbox"
+                  name="terms"
+                  value="on"
+                  required
+                >
+
+                <span>
+                  Confirmo que mis datos y mi dirección
+                  de entrega son correctos.
+                </span>
+
+              </label>
 
               <small data-error-for="terms"></small>
 
             </div>
 
 
-            <!-- SUBMIT -->
+            <!-- CREATE ORDER -->
 
             <button
               id="checkoutSubmitButton"
@@ -524,6 +796,203 @@
 
           </form>
 
+
+          <!-- =========================
+               PAYMENT
+          ========================== -->
+
+          <section
+            id="checkoutPaymentSection"
+            class="checkout-payment-section"
+            hidden
+          >
+
+            <div class="checkout-section-heading">
+              <span>04</span>
+
+              <div>
+                <h2>Pago seguro</h2>
+
+                <p>
+                  Ingresa los datos de tu tarjeta
+                  para completar la compra.
+                </p>
+              </div>
+            </div>
+
+
+            <div class="checkout-payment-order">
+
+              <div>
+                <span>Pedido</span>
+
+                <strong id="checkoutPaymentOrderNumber">
+                  —
+                </strong>
+              </div>
+
+
+              <div class="checkout-payment-order-total">
+                <span>Total a pagar</span>
+
+                <strong id="checkoutPaymentTotal">
+                  $0
+                </strong>
+              </div>
+
+            </div>
+
+
+            <div
+              id="checkoutPaymentLoading"
+              class="checkout-payment-loading"
+            >
+              Preparando pago seguro...
+            </div>
+
+
+            <form
+              id="form-checkout"
+              class="checkout-payment-form"
+              hidden
+            >
+
+              <div class="checkout-payment-grid">
+
+                <div
+                  class="
+                    checkout-payment-field
+                    checkout-payment-field-full
+                  "
+                >
+                  <label>
+                    Número de tarjeta
+                  </label>
+
+                  <div
+                    id="form-checkout__cardNumber"
+                    class="checkout-payment-secure-field"
+                  ></div>
+                </div>
+
+
+                <div class="checkout-payment-field">
+                  <label>
+                    Vencimiento
+                  </label>
+
+                  <div
+                    id="form-checkout__expirationDate"
+                    class="checkout-payment-secure-field"
+                  ></div>
+                </div>
+
+
+                <div class="checkout-payment-field">
+                  <label>
+                    Código de seguridad
+                  </label>
+
+                  <div
+                    id="form-checkout__securityCode"
+                    class="checkout-payment-secure-field"
+                  ></div>
+                </div>
+
+
+                <div
+                  class="
+                    checkout-payment-field
+                    checkout-payment-field-full
+                  "
+                >
+                  <label for="form-checkout__cardholderName">
+                    Nombre del titular
+                  </label>
+
+                  <input
+                    id="form-checkout__cardholderName"
+                    type="text"
+                    autocomplete="cc-name"
+                    placeholder="Como aparece en la tarjeta"
+                  >
+                </div>
+
+
+                <div class="checkout-payment-field">
+                  <label for="form-checkout__issuer">
+                    Banco emisor
+                  </label>
+
+                  <select
+                    id="form-checkout__issuer"
+                  ></select>
+                </div>
+
+
+                <div class="checkout-payment-field">
+                  <label for="form-checkout__installments">
+                    Mensualidades
+                  </label>
+
+                  <select
+                    id="form-checkout__installments"
+                  ></select>
+                </div>
+
+              </div>
+
+
+              <input
+                id="form-checkout__cardholderEmail"
+                class="checkout-payment-hidden-email"
+                type="email"
+                tabindex="-1"
+                aria-hidden="true"
+              >
+
+
+              <progress
+                id="checkoutPaymentProgress"
+                class="checkout-payment-progress"
+                value="0"
+              ></progress>
+
+
+              <div class="checkout-payment-security">
+
+                <span>◇</span>
+
+                <p>
+                  Los datos sensibles de tu tarjeta
+                  son procesados directamente por
+                  Mercado Pago. DUVANT 12 no almacena
+                  tu número de tarjeta ni tu código
+                  de seguridad.
+                </p>
+
+              </div>
+
+
+              <div
+                id="checkoutPaymentError"
+                class="checkout-payment-error"
+                role="alert"
+              ></div>
+
+
+              <button
+                id="checkoutPaymentButton"
+                class="checkout-payment-button"
+                type="submit"
+              >
+                Pagar ahora
+              </button>
+
+            </form>
+
+          </section>
+
         </section>
 
 
@@ -536,6 +1005,7 @@
           <div class="checkout-summary-card">
 
             <div class="checkout-summary-heading">
+
               <div>
                 <span>Tu selección</span>
                 <h2>Resumen del pedido</h2>
@@ -544,6 +1014,7 @@
               <strong id="checkoutSummaryCount">
                 0
               </strong>
+
             </div>
 
 
@@ -574,17 +1045,20 @@
 
 
               <div class="checkout-summary-total">
+
                 <span>Total</span>
 
                 <strong id="checkoutTotal">
                   $0
                 </strong>
+
               </div>
 
             </div>
 
 
             <div class="checkout-summary-message">
+
               <span>DUVANT 12</span>
 
               <p>
@@ -592,6 +1066,7 @@
                 verifican directamente con nuestro
                 inventario al crear tu pedido.
               </p>
+
             </div>
 
           </div>
@@ -606,7 +1081,7 @@
 
 
   <!-- =========================
-       SUCCESS MODAL
+       RESULT MODAL
   ========================== -->
 
   <div
@@ -626,16 +1101,19 @@
         D12
       </div>
 
-      <span class="checkout-ready-eyebrow">
-        PEDIDO CREADO
+      <span
+        id="checkoutReadyEyebrow"
+        class="checkout-ready-eyebrow"
+      >
+        PAGO ENVIADO
       </span>
 
       <h2 id="checkoutReadyTitle">
-        Pedido preparado
+        Procesando pago
       </h2>
 
       <p>
-        Tu pedido fue creado correctamente.
+        Estamos verificando tu pago.
       </p>
 
       <button
@@ -668,6 +1146,10 @@
 
   <script
     src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"
+  ></script>
+
+  <script
+    src="https://sdk.mercadopago.com/js/v2"
   ></script>
 
   <script src="supabase-config.js"></script>
