@@ -41,8 +41,6 @@ let activeOrder =
 let mercadoPago =
   null;
 
-let cardForm =
-  null;
 
 let paymentIsProcessing =
   false;
@@ -125,25 +123,12 @@ const checkoutPaymentLoading =
     "checkoutPaymentLoading"
   );
 
-const checkoutPaymentForm =
-  document.getElementById(
-    "form-checkout"
-  );
-
-const checkoutPaymentButton =
-  document.getElementById(
-    "checkoutPaymentButton"
-  );
 
 const checkoutPaymentError =
   document.getElementById(
     "checkoutPaymentError"
   );
 
-const checkoutPaymentProgress =
-  document.getElementById(
-    "checkoutPaymentProgress"
-  );
 
 const checkoutPaymentOrderNumber =
   document.getElementById(
@@ -155,10 +140,11 @@ const checkoutPaymentTotal =
     "checkoutPaymentTotal"
   );
 
-const checkoutPaymentEmail =
+  const cardPaymentBrickContainer =
   document.getElementById(
-    "form-checkout__cardholderEmail"
+    "cardPaymentBrick_container"
   );
+
 
 
 /* ==========================================
@@ -1163,7 +1149,7 @@ function closeReadyModalWindow() {
 ========================================== */
 
 async function processMercadoPagoPayment(
-  cardData
+  formData
 ) {
   if (!activeOrder) {
     throw new Error(
@@ -1174,19 +1160,22 @@ async function processMercadoPagoPayment(
 
   const token =
     sanitizeText(
-      cardData?.token
+      formData?.token
     );
+
 
   const paymentMethodId =
     sanitizeText(
-      cardData?.paymentMethodId
+      formData?.payment_method_id ||
+      formData?.paymentMethodId
     );
+
 
   const installments =
     Math.max(
       1,
       Number(
-        cardData?.installments ||
+        formData?.installments ||
         1
       )
     );
@@ -1205,14 +1194,6 @@ async function processMercadoPagoPayment(
     );
   }
 
-
-  /*
-    ETAPA INICIAL DUVANT 12:
-    solamente tarjeta de crédito.
-
-    Esto encaja con la reserva de inventario
-    de 15 minutos que ya tenemos.
-  */
 
   const requestBody = {
     order_id:
@@ -1233,7 +1214,7 @@ async function processMercadoPagoPayment(
 
 
   console.log(
-    "DUVANT 12 — Procesando pago Mercado Pago:",
+    "DUVANT 12 — Enviando pago:",
     {
       order_id:
         activeOrder.id,
@@ -1264,7 +1245,7 @@ async function processMercadoPagoPayment(
 
   if (error) {
     console.error(
-      "create-mp-order invoke:",
+      "create-mp-order:",
       error
     );
 
@@ -1289,17 +1270,14 @@ async function processMercadoPagoPayment(
     data.ok !== true
   ) {
     console.error(
-      "Mercado Pago rechazó la solicitud:",
+      "Mercado Pago:",
       data
     );
 
-    const backendMessage =
+    throw new Error(
       sanitizeText(
         data.error
-      );
-
-    throw new Error(
-      backendMessage ||
+      ) ||
       "MP_PAYMENT_ERROR"
     );
   }
@@ -1320,9 +1298,6 @@ async function initializeMercadoPago(
   checkoutPaymentLoading.hidden =
     false;
 
-  checkoutPaymentForm.hidden =
-    true;
-
   clearPaymentError();
 
 
@@ -1338,20 +1313,6 @@ async function initializeMercadoPago(
 
   const publicKey =
     await getMercadoPagoPublicKey();
-
-
-  mercadoPago =
-    new window.MercadoPago(
-      publicKey,
-      {
-        locale:
-          "es-MX"
-      }
-    );
-
-
-  checkoutPaymentEmail.value =
-    customerData.email;
 
 
   const amount =
@@ -1372,148 +1333,295 @@ async function initializeMercadoPago(
   }
 
 
-cardForm =
-  mercadoPago.cardForm({
-    amount:
-      amount.toFixed(
-        2
-      ),
+  /*
+    Si hubiera quedado un Brick montado
+    anteriormente, lo destruimos antes
+    de crear uno nuevo.
+  */
 
-    iframe:
-      true,
+  if (
+    window
+      .cardPaymentBrickController &&
+    typeof window
+      .cardPaymentBrickController
+      .unmount === "function"
+  ) {
+    try {
+      await window
+        .cardPaymentBrickController
+        .unmount();
+    } catch (error) {
+      console.warn(
+        "No fue posible desmontar Brick anterior:",
+        error
+      );
+    }
+  }
 
-    style: {
-      theme:
-        "dark"
-    },
 
-    form: {
-      id:
-        "form-checkout",
+  cardPaymentBrickContainer.innerHTML =
+    "";
 
-      cardNumber: {
-        id:
-          "form-checkout__cardNumber",
 
-        placeholder:
-          "Número de tarjeta"
-      },
+  mercadoPago =
+    new window.MercadoPago(
+      publicKey,
+      {
+        locale:
+          "es-MX"
+      }
+    );
 
-      expirationDate: {
-        id:
-          "form-checkout__expirationDate",
 
-        placeholder:
-          "MM/AA"
-      },
+  const bricksBuilder =
+    mercadoPago.bricks();
 
-      securityCode: {
-        id:
-          "form-checkout__securityCode",
 
-        placeholder:
-          "CVV"
-      },
+  const settings = {
 
-      cardholderName: {
-        id:
-          "form-checkout__cardholderName",
+    /* ======================================
+       ORDER DATA
+    ====================================== */
 
-        placeholder:
-          "Titular de la tarjeta"
-      },
+    initialization: {
+      amount:
+        amount,
 
-      issuer: {
-        id:
-          "form-checkout__issuer",
-
-        placeholder:
-          "Banco emisor"
-      },
-
-      installments: {
-        id:
-          "form-checkout__installments",
-
-        placeholder:
-          "Mensualidades"
-      },
-
-      cardholderEmail: {
-        id:
-          "form-checkout__cardholderEmail",
-
-        placeholder:
-          "Correo electrónico"
+      payer: {
+        email:
+          customerData.email
       }
     },
 
-    // aquí continúan tus callbacks actuales...
+
+    /* ======================================
+       DUVANT 12 VISUAL
+    ====================================== */
+
+    customization: {
+
+      visual: {
+
+        style: {
+
+          customVariables: {
+
+            /*
+              TEXTO PRINCIPAL:
+              plata clara para máxima lectura
+            */
+
+            textPrimaryColor:
+              "#E7E7E7",
+
+            textSecondaryColor:
+              "#BEBEBE",
+
+
+            /*
+              FONDO DEL BRICK
+            */
+
+            inputBackgroundColor:
+              "#111111",
+
+            formBackgroundColor:
+              "#0B0B0B",
+
+
+            /*
+              PLATA DUVANT
+            */
+
+            baseColor:
+              "#D6D6D6",
+
+            baseColorFirstVariant:
+              "#BDBDBD",
+
+            baseColorSecondVariant:
+              "#8F8F8F",
+
+
+            /*
+              BORDES
+            */
+
+            outlinePrimaryColor:
+              "#CFCFCF",
+
+            outlineSecondaryColor:
+              "#555555",
+
+
+            /*
+              BOTÓN
+            */
+
+            buttonTextColor:
+              "#090909",
+
+
+            /*
+              ESTADOS
+            */
+
+            errorColor:
+              "#E88A8A",
+
+            successColor:
+              "#D2D2D2",
+
+            successSecondaryColor:
+              "#9E9E9E",
+
+
+            /*
+              INPUTS
+            */
+
+            inputBorderWidth:
+              "1px",
+
+            inputFocusedBorderWidth:
+              "1px",
+
+            inputVerticalPadding:
+              "12px",
+
+            inputHorizontalPadding:
+              "14px",
+
+
+            /*
+              DUVANT usa bordes rectos
+            */
+
+            borderRadiusSmall:
+              "0px",
+
+            borderRadiusMedium:
+              "0px",
+
+            borderRadiusLarge:
+              "0px",
+
+
+            /*
+              Evita brillo azul del estilo
+              Mercado Pago.
+            */
+
+            inputFocusedBoxShadow:
+              "0 0 0 1px rgba(210,210,210,0.25)",
+
+            inputErrorFocusedBoxShadow:
+              "0 0 0 1px rgba(232,138,138,0.25)"
+          }
+        },
+
+
+        texts: {
+
+          formTitle:
+            "Tarjeta",
+
+          cardNumber: {
+            label:
+              "Número de tarjeta",
+
+            placeholder:
+              "Número de tarjeta"
+          },
+
+          cardExpirationDate: {
+            label:
+              "Vencimiento",
+
+            placeholder:
+              "MM/AA"
+          },
+
+          cardSecurityCode: {
+            label:
+              "Código de seguridad",
+
+            placeholder:
+              "CVV"
+          },
+
+          cardholderName: {
+            label:
+              "Nombre del titular",
+
+            placeholder:
+              "Como aparece en la tarjeta"
+          },
+
+          installmentsSectionTitle:
+            "Mensualidades",
+
+          selectInstallments:
+            "Selecciona las mensualidades",
+
+          formSubmit:
+            "Pagar ahora"
+        }
+      },
+
+
+      /*
+        Por ahora sólo tarjeta.
+        Nada de OXXO / SPEI / otros medios
+        mientras nuestra reserva sea 15 min.
+      */
+
+      paymentMethods: {
+        minInstallments:
+          1
+      }
+    },
+
+
+    /* ======================================
+       CALLBACKS
+    ====================================== */
 
     callbacks: {
-      onFormMounted:
-        error => {
-          if (error) {
-            console.error(
-              "Mercado Pago CardForm mount:",
-              error
-            );
 
-            checkoutPaymentLoading.hidden =
-              true;
-
-            showPaymentError(
-              "No fue posible cargar el formulario seguro de pago."
-            );
-
-            return;
-          }
+      onReady:
+        () => {
 
           checkoutPaymentLoading.hidden =
             true;
 
-          checkoutPaymentForm.hidden =
-            false;
+          clearPaymentError();
+
+          console.log(
+            "DUVANT 12 — Card Payment Brick listo."
+          );
         },
 
-      onSubmit:
-        async event => {
-          event.preventDefault();
 
-          if (
-            paymentIsProcessing
-          ) {
-            return;
-          }
+      onSubmit:
+        async formData => {
 
           clearPaymentError();
 
+
           try {
-            setPaymentProcessing(
-              true
-            );
-
-            const cardData =
-              cardForm.getCardFormData();
-
-            if (
-              !cardData ||
-              !cardData.token
-            ) {
-              throw new Error(
-                "CARD_DATA_INVALID"
-              );
-            }
 
             const result =
               await processMercadoPagoPayment(
-                cardData
+                formData
               );
 
+
             console.log(
-              "DUVANT 12 — Mercado Pago:",
+              "DUVANT 12 — Resultado Mercado Pago:",
               result
             );
+
 
             openPaymentResultModal(
               result.order ||
@@ -1523,14 +1631,27 @@ cardForm =
                 {}
             );
 
+
+            /*
+              Resolvemos Promise para que
+              Mercado Pago termine el estado
+              de carga del Brick.
+            */
+
+            return Promise.resolve();
+
+
           } catch (error) {
+
             console.error(
               "Payment error:",
               error
             );
 
+
             let message =
               "No fue posible procesar el pago. Revisa los datos de tu tarjeta e inténtalo nuevamente.";
+
 
             if (
               error?.message ===
@@ -1540,53 +1661,68 @@ cardForm =
                 "Mercado Pago no pudo procesar la operación en este momento.";
             }
 
+
             if (
               error?.message ===
-                "CARD_DATA_INVALID" ||
+                "CARD_TOKEN_MISSING" ||
               error?.message ===
-                "CARD_TOKEN_MISSING"
+                "PAYMENT_METHOD_MISSING"
             ) {
               message =
                 "Revisa los datos de tu tarjeta antes de continuar.";
             }
 
+
             showPaymentError(
               message
             );
+
 
             store.showToast(
               "No fue posible procesar el pago."
             );
 
-          } finally {
-            setPaymentProcessing(
-              false
+
+            /*
+              Rechazamos para que Brick
+              libere correctamente su estado.
+            */
+
+            return Promise.reject(
+              error
             );
           }
         },
 
-      onFetching:
-        resource => {
-          console.log(
-            "Mercado Pago fetching:",
-            resource
+
+      onError:
+        error => {
+
+          console.error(
+            "Mercado Pago Brick:",
+            error
           );
 
-          checkoutPaymentProgress.removeAttribute(
-            "value"
-          );
 
-          return () => {
-            checkoutPaymentProgress.setAttribute(
-              "value",
-              "0"
-            );
-          };
+          checkoutPaymentLoading.hidden =
+            true;
+
+
+          showPaymentError(
+            "Ocurrió un problema con el formulario seguro de Mercado Pago."
+          );
         }
     }
-  });
-}
+  };
 
+
+  window.cardPaymentBrickController =
+    await bricksBuilder.create(
+      "cardPayment",
+      "cardPaymentBrick_container",
+      settings
+    );
+}
 
 /* ==========================================
    SHOW PAYMENT STAGE

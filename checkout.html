@@ -291,6 +291,33 @@
         text-align: left;
       }
     }
+    .checkout-payment-brick {
+  width: 100%;
+  margin-top: 8px;
+}
+
+.checkout-payment-brick:empty {
+  display: none;
+}
+
+.checkout-payment-loading[hidden] {
+  display: none !important;
+}
+
+.checkout-payment-error {
+  display: none;
+  margin-top: 14px;
+  padding: 12px 14px;
+  border: 1px solid rgba(255, 97, 97, 0.24);
+  background: rgba(160, 22, 22, 0.08);
+  color: #e8baba;
+  font-size: 12px;
+  line-height: 1.55;
+}
+
+.checkout-payment-error.visible {
+  display: block;
+}
   </style>
 </head>
 
@@ -851,146 +878,23 @@
             </div>
 
 
-            <form
-              id="form-checkout"
-              class="checkout-payment-form"
-              hidden
-            >
+            <div
+  id="checkoutPaymentLoading"
+  class="checkout-payment-loading"
+>
+  Preparando pago seguro...
+</div>
 
-              <div class="checkout-payment-grid">
+<div
+  id="cardPaymentBrick_container"
+  class="checkout-payment-brick"
+></div>
 
-                <div
-                  class="
-                    checkout-payment-field
-                    checkout-payment-field-full
-                  "
-                >
-                  <label>
-                    Número de tarjeta
-                  </label>
-
-                  <div
-                    id="form-checkout__cardNumber"
-                    class="checkout-payment-secure-field"
-                  ></div>
-                </div>
-
-
-                <div class="checkout-payment-field">
-                  <label>
-                    Vencimiento
-                  </label>
-
-                  <div
-                    id="form-checkout__expirationDate"
-                    class="checkout-payment-secure-field"
-                  ></div>
-                </div>
-
-
-                <div class="checkout-payment-field">
-                  <label>
-                    Código de seguridad
-                  </label>
-
-                  <div
-                    id="form-checkout__securityCode"
-                    class="checkout-payment-secure-field"
-                  ></div>
-                </div>
-
-
-                <div
-                  class="
-                    checkout-payment-field
-                    checkout-payment-field-full
-                  "
-                >
-                  <label for="form-checkout__cardholderName">
-                    Nombre del titular
-                  </label>
-
-                  <input
-                    id="form-checkout__cardholderName"
-                    type="text"
-                    autocomplete="cc-name"
-                    placeholder="Como aparece en la tarjeta"
-                  >
-                </div>
-
-
-                <div class="checkout-payment-field">
-                  <label for="form-checkout__issuer">
-                    Banco emisor
-                  </label>
-
-                  <select
-                    id="form-checkout__issuer"
-                  ></select>
-                </div>
-
-
-                <div class="checkout-payment-field">
-                  <label for="form-checkout__installments">
-                    Mensualidades
-                  </label>
-
-                  <select
-                    id="form-checkout__installments"
-                  ></select>
-                </div>
-
-              </div>
-
-
-              <input
-                id="form-checkout__cardholderEmail"
-                class="checkout-payment-hidden-email"
-                type="email"
-                tabindex="-1"
-                aria-hidden="true"
-              >
-
-
-              <progress
-                id="checkoutPaymentProgress"
-                class="checkout-payment-progress"
-                value="0"
-              ></progress>
-
-
-              <div class="checkout-payment-security">
-
-                <span>◇</span>
-
-                <p>
-                  Los datos sensibles de tu tarjeta
-                  son procesados directamente por
-                  Mercado Pago. DUVANT 12 no almacena
-                  tu número de tarjeta ni tu código
-                  de seguridad.
-                </p>
-
-              </div>
-
-
-              <div
-                id="checkoutPaymentError"
-                class="checkout-payment-error"
-                role="alert"
-              ></div>
-
-
-              <button
-                id="checkoutPaymentButton"
-                class="checkout-payment-button"
-                type="submit"
-              >
-                Pagar ahora
-              </button>
-
-            </form>
-
+<div
+  id="checkoutPaymentError"
+  class="checkout-payment-error"
+  role="alert"
+></div>
           </section>
 
         </section>
