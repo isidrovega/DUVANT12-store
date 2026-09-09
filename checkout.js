@@ -1372,257 +1372,252 @@ async function initializeMercadoPago(
   }
 
 
-  cardForm =
-    mercadoPago.cardForm({
-      amount:
-        amount.toFixed(
-          2
-        ),
+cardForm =
+  mercadoPago.cardForm({
+    amount:
+      amount.toFixed(
+        2
+      ),
 
-      iframe:
-        true,
+    iframe:
+      true,
 
-      form: {
+    style: {
+      theme:
+        "dark",
+
+      customVariables: {
+        textPrimaryColor:
+          "#f5f5f5",
+
+        textSecondaryColor:
+          "#b9b9b9",
+
+        inputBackgroundColor:
+          "#111111",
+
+        formBackgroundColor:
+          "#111111",
+
+        baseColor:
+          "#d8d8d8",
+
+        baseColorFirstVariant:
+          "#a8a8a8",
+
+        baseColorSecondVariant:
+          "#7d7d7d",
+
+        errorColor:
+          "#e57d7d",
+
+        successColor:
+          "#cfcfcf",
+
+        outlinePrimaryColor:
+          "#d8d8d8",
+
+        outlineSecondaryColor:
+          "#666666"
+      }
+    },
+
+    form: {
+      id:
+        "form-checkout",
+
+      cardNumber: {
         id:
-          "form-checkout",
+          "form-checkout__cardNumber",
 
-        cardNumber: {
-          id:
-            "form-checkout__cardNumber",
-
-          placeholder:
-            "Número de tarjeta"
-        },
-
-        expirationDate: {
-          id:
-            "form-checkout__expirationDate",
-
-          placeholder:
-            "MM/AA"
-        },
-
-        securityCode: {
-          id:
-            "form-checkout__securityCode",
-
-          placeholder:
-            "CVV"
-        },
-
-        cardholderName: {
-          id:
-            "form-checkout__cardholderName",
-
-          placeholder:
-            "Titular de la tarjeta"
-        },
-
-        issuer: {
-          id:
-            "form-checkout__issuer",
-
-          placeholder:
-            "Banco emisor"
-        },
-
-        installments: {
-          id:
-            "form-checkout__installments",
-
-          placeholder:
-            "Mensualidades"
-        },
-
-        cardholderEmail: {
-          id:
-            "form-checkout__cardholderEmail",
-
-          placeholder:
-            "Correo electrónico"
-        }
+        placeholder:
+          "Número de tarjeta"
       },
 
+      expirationDate: {
+        id:
+          "form-checkout__expirationDate",
 
-      callbacks: {
+        placeholder:
+          "MM/AA"
+      },
 
-        /* ==================================
-           FORM MOUNTED
-        ================================== */
+      securityCode: {
+        id:
+          "form-checkout__securityCode",
 
-        onFormMounted:
-          error => {
-            if (error) {
-              console.error(
-                "Mercado Pago CardForm mount:",
-                error
-              );
+        placeholder:
+          "CVV"
+      },
 
-              checkoutPaymentLoading.hidden =
-                true;
+      cardholderName: {
+        id:
+          "form-checkout__cardholderName",
 
-              showPaymentError(
-                "No fue posible cargar el formulario seguro de pago."
-              );
+        placeholder:
+          "Titular de la tarjeta"
+      },
 
-              return;
-            }
+      issuer: {
+        id:
+          "form-checkout__issuer",
 
+        placeholder:
+          "Banco emisor"
+      },
+
+      installments: {
+        id:
+          "form-checkout__installments",
+
+        placeholder:
+          "Mensualidades"
+      },
+
+      cardholderEmail: {
+        id:
+          "form-checkout__cardholderEmail",
+
+        placeholder:
+          "Correo electrónico"
+      }
+    },
+
+    callbacks: {
+      onFormMounted:
+        error => {
+          if (error) {
+            console.error(
+              "Mercado Pago CardForm mount:",
+              error
+            );
 
             checkoutPaymentLoading.hidden =
               true;
 
-            checkoutPaymentForm.hidden =
-              false;
-          },
+            showPaymentError(
+              "No fue posible cargar el formulario seguro de pago."
+            );
 
+            return;
+          }
 
-        /* ==================================
-           PAYMENT SUBMIT
-        ================================== */
+          checkoutPaymentLoading.hidden =
+            true;
 
-        onSubmit:
-          async event => {
-            event.preventDefault();
+          checkoutPaymentForm.hidden =
+            false;
+        },
 
+      onSubmit:
+        async event => {
+          event.preventDefault();
+
+          if (
+            paymentIsProcessing
+          ) {
+            return;
+          }
+
+          clearPaymentError();
+
+          try {
+            setPaymentProcessing(
+              true
+            );
+
+            const cardData =
+              cardForm.getCardFormData();
 
             if (
-              paymentIsProcessing
+              !cardData ||
+              !cardData.token
             ) {
-              return;
-            }
-
-
-            clearPaymentError();
-
-
-            try {
-              setPaymentProcessing(
-                true
-              );
-
-
-              const cardData =
-                cardForm.getCardFormData();
-
-
-              if (
-                !cardData ||
-                !cardData.token
-              ) {
-                throw new Error(
-                  "CARD_DATA_INVALID"
-                );
-              }
-
-
-              const result =
-                await processMercadoPagoPayment(
-                  cardData
-                );
-
-
-              console.log(
-                "DUVANT 12 — Mercado Pago:",
-                result
-              );
-
-
-              /*
-                IMPORTANTE:
-                NO vaciamos el carrito aquí.
-
-                Tampoco reiniciamos el request ID.
-
-                El webhook será la autoridad
-                definitiva para aprobar el pago,
-                confirmar la reserva y registrar
-                Venta Online.
-              */
-
-
-              openPaymentResultModal(
-                result.order ||
-                  activeOrder,
-
-                result.mercado_pago ||
-                  {}
-              );
-
-
-            } catch (error) {
-              console.error(
-                "Payment error:",
-                error
-              );
-
-
-              let message =
-                "No fue posible procesar el pago. Revisa los datos de tu tarjeta e inténtalo nuevamente.";
-
-
-              if (
-                error?.message ===
-                "MP_FUNCTION_ERROR"
-              ) {
-                message =
-                  "Mercado Pago no pudo procesar la operación en este momento.";
-              }
-
-
-              if (
-                error?.message ===
-                "CARD_DATA_INVALID" ||
-                error?.message ===
-                "CARD_TOKEN_MISSING"
-              ) {
-                message =
-                  "Revisa los datos de tu tarjeta antes de continuar.";
-              }
-
-
-              showPaymentError(
-                message
-              );
-
-              store.showToast(
-                "No fue posible procesar el pago."
-              );
-
-            } finally {
-              setPaymentProcessing(
-                false
+              throw new Error(
+                "CARD_DATA_INVALID"
               );
             }
-          },
 
+            const result =
+              await processMercadoPagoPayment(
+                cardData
+              );
 
-        /* ==================================
-           MP FETCHING
-        ================================== */
-
-        onFetching:
-          resource => {
             console.log(
-              "Mercado Pago fetching:",
-              resource
+              "DUVANT 12 — Mercado Pago:",
+              result
             );
 
+            openPaymentResultModal(
+              result.order ||
+                activeOrder,
 
-            checkoutPaymentProgress.removeAttribute(
-              "value"
+              result.mercado_pago ||
+                {}
             );
 
+          } catch (error) {
+            console.error(
+              "Payment error:",
+              error
+            );
 
-            return () => {
-              checkoutPaymentProgress.setAttribute(
-                "value",
-                "0"
-              );
-            };
+            let message =
+              "No fue posible procesar el pago. Revisa los datos de tu tarjeta e inténtalo nuevamente.";
+
+            if (
+              error?.message ===
+              "MP_FUNCTION_ERROR"
+            ) {
+              message =
+                "Mercado Pago no pudo procesar la operación en este momento.";
+            }
+
+            if (
+              error?.message ===
+                "CARD_DATA_INVALID" ||
+              error?.message ===
+                "CARD_TOKEN_MISSING"
+            ) {
+              message =
+                "Revisa los datos de tu tarjeta antes de continuar.";
+            }
+
+            showPaymentError(
+              message
+            );
+
+            store.showToast(
+              "No fue posible procesar el pago."
+            );
+
+          } finally {
+            setPaymentProcessing(
+              false
+            );
           }
-      }
-    });
+        },
+
+      onFetching:
+        resource => {
+          console.log(
+            "Mercado Pago fetching:",
+            resource
+          );
+
+          checkoutPaymentProgress.removeAttribute(
+            "value"
+          );
+
+          return () => {
+            checkoutPaymentProgress.setAttribute(
+              "value",
+              "0"
+            );
+          };
+        }
+    }
+  });
 }
 
 
