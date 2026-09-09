@@ -271,6 +271,19 @@ function createRequestId() {
 }
 
 
+function createNewCheckoutRequestId() {
+  const requestId =
+    createRequestId();
+
+  localStorage.setItem(
+    CHECKOUT_REQUEST_KEY,
+    requestId
+  );
+
+  return requestId;
+}
+
+
 function getCheckoutRequestId() {
   let requestId =
     localStorage.getItem(
@@ -279,12 +292,7 @@ function getCheckoutRequestId() {
 
   if (!requestId) {
     requestId =
-      createRequestId();
-
-    localStorage.setItem(
-      CHECKOUT_REQUEST_KEY,
-      requestId
-    );
+      createNewCheckoutRequestId();
   }
 
   return requestId;
@@ -296,7 +304,6 @@ function resetCheckoutRequestId() {
     CHECKOUT_REQUEST_KEY
   );
 }
-
 
 /* ==========================================
    CHECKOUT DRAFT
@@ -1724,6 +1731,7 @@ async function initializeMercadoPago(
     );
 }
 
+
 /* ==========================================
    SHOW PAYMENT STAGE
 ========================================== */
@@ -2357,16 +2365,28 @@ async function initializeCheckout() {
 
     renderSummary();
 
-    populateDraft();
+populateDraft();
 
-    getCheckoutRequestId();
+/*
+  Cada entrada nueva al checkout representa
+  una nueva intención de compra.
+
+  Generamos un client_request_id nuevo aquí.
+
+  Dentro de esta misma sesión de checkout,
+  buildOrderRequest() seguirá reutilizando
+  exactamente este mismo ID, conservando
+  la idempotencia contra doble clic o
+  reintentos accidentales.
+*/
+createNewCheckoutRequestId();
 
 
-    checkoutLoading.hidden =
-      true;
+checkoutLoading.hidden =
+  true;
 
-    checkoutContent.hidden =
-      false;
+checkoutContent.hidden =
+  false;
 
 
   } catch (error) {
