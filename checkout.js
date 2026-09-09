@@ -1384,42 +1384,7 @@ cardForm =
 
     style: {
       theme:
-        "dark",
-
-      customVariables: {
-        textPrimaryColor:
-          "#f5f5f5",
-
-        textSecondaryColor:
-          "#b9b9b9",
-
-        inputBackgroundColor:
-          "#111111",
-
-        formBackgroundColor:
-          "#111111",
-
-        baseColor:
-          "#d8d8d8",
-
-        baseColorFirstVariant:
-          "#a8a8a8",
-
-        baseColorSecondVariant:
-          "#7d7d7d",
-
-        errorColor:
-          "#e57d7d",
-
-        successColor:
-          "#cfcfcf",
-
-        outlinePrimaryColor:
-          "#d8d8d8",
-
-        outlineSecondaryColor:
-          "#666666"
-      }
+        "dark"
     },
 
     form: {
@@ -1482,6 +1447,8 @@ cardForm =
           "Correo electrónico"
       }
     },
+
+    // aquí continúan tus callbacks actuales...
 
     callbacks: {
       onFormMounted:
