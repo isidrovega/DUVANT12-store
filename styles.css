@@ -1710,12 +1710,25 @@ img {
   position: fixed;
   inset: 0;
   z-index: 1000;
+
   display: flex;
   flex-direction: column;
+
+  width: 100%;
+  height: 100dvh;
+
   padding: 25px;
+
+  overflow-x: hidden;
+  overflow-y: auto;
+
   transform: translateX(-100%);
   background: #090a0b;
   visibility: hidden;
+
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
+
   transition:
     transform 350ms ease,
     visibility 350ms ease;
@@ -1749,7 +1762,8 @@ img {
 .mobile-nav {
   display: flex;
   flex-direction: column;
-  margin-top: 65px;
+  flex: 0 0 auto;
+  margin-top: 40px;
 }
 
 .mobile-nav a {
@@ -1771,8 +1785,9 @@ img {
 }
 
 .mobile-menu-footer {
-  margin-top: auto;
+  margin-top: 40px;
   padding-top: 25px;
+  padding-bottom: max(10px, env(safe-area-inset-bottom));
   border-top: 1px solid var(--line);
 }
 
@@ -1787,6 +1802,26 @@ img {
   margin-top: 6px;
   color: #4e5359;
   font-size: 0.62rem;
+}
+
+@media (max-height: 700px) {
+  .mobile-menu {
+    padding-top: 18px;
+    padding-bottom: 18px;
+  }
+
+  .mobile-nav {
+    margin-top: 25px;
+  }
+
+  .mobile-nav a {
+    padding: 14px 0;
+    font-size: 1.35rem;
+  }
+
+  .mobile-menu-footer {
+    margin-top: 30px;
+  }
 }
 
 
