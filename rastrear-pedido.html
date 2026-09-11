@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
+  >
+
+  <meta
+    name="description"
+    content="Rastrea el estado de tu pedido DUVANT12."
+  >
+
+  <title>Rastrear pedido | DUVANT12</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
+    rel="stylesheet"
+  >
+
+  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="rastrear-pedido.css">
+</head>
+
+<body class="tracking-page">
+
+  <header class="tracking-header">
+    <div class="tracking-header-inner">
+
+      <a
+        class="tracking-brand"
+        href="index.html"
+        aria-label="DUVANT12 Inicio"
+      >
+        DUVANT12
+      </a>
+
+      <a
+        class="tracking-back-link"
+        href="index.html"
+      >
+        Volver a la tienda
+      </a>
+
+    </div>
+  </header>
+
+
+  <main class="tracking-main">
+
+    <section class="tracking-hero">
+
+      <div class="tracking-eyebrow">
+        DUVANT12 · ORDER TRACKING
+      </div>
+
+      <h1>
+        Rastrea tu pedido
+      </h1>
+
+      <p>
+        Consulta el estado actual de tu pedido utilizando
+        tu número de pedido y el correo electrónico con
+        el que realizaste la compra.
+      </p>
+
+    </section>
+
+
+    <section class="tracking-panel">
+
+      <form
+        id="trackingForm"
+        class="tracking-form"
+        novalidate
+      >
+
+        <div class="tracking-field">
+
+          <label for="trackingOrderNumber">
+            Número de pedido
+          </label>
+
+          <input
+            id="trackingOrderNumber"
+            name="order_number"
+            type="text"
+            inputmode="text"
+            autocomplete="off"
+            placeholder="D12-20260911-000123"
+            maxlength="32"
+            required
+          >
+
+        </div>
+
+
+        <div class="tracking-field">
+
+          <label for="trackingEmail">
+            Correo electrónico
+          </label>
+
+          <input
+            id="trackingEmail"
+            name="email"
+            type="email"
+            autocomplete="email"
+            placeholder="cliente@email.com"
+            maxlength="180"
+            required
+          >
+
+        </div>
+
+
+        <button
+          id="trackingSubmitButton"
+          class="tracking-submit-button"
+          type="submit"
+        >
+          Rastrear pedido
+        </button>
+
+      </form>
+
+
+      <div
+        id="trackingMessage"
+        class="tracking-message"
+        hidden
+        role="status"
+        aria-live="polite"
+      ></div>
+
+    </section>
+
+
+    <section
+      id="trackingResult"
+      class="tracking-result"
+      hidden
+    >
+
+      <div class="tracking-result-header">
+
+        <div>
+
+          <div class="tracking-result-label">
+            Pedido
+          </div>
+
+          <h2 id="trackingResultOrderNumber">
+            —
+          </h2>
+
+        </div>
+
+
+        <div
+          id="trackingStatusBadge"
+          class="tracking-status-badge"
+        >
+          —
+        </div>
+
+      </div>
+
+
+      <div class="tracking-progress">
+
+        <div
+          class="tracking-progress-step"
+          data-tracking-step="paid"
+        >
+          <div class="tracking-progress-dot"></div>
+
+          <div>
+            <strong>Pago confirmado</strong>
+            <span id="trackingPaidDate">
+              Pedido recibido
+            </span>
+          </div>
+        </div>
+
+
+        <div
+          class="tracking-progress-step"
+          data-tracking-step="preparing"
+        >
+          <div class="tracking-progress-dot"></div>
+
+          <div>
+            <strong>Preparando</strong>
+            <span id="trackingPreparingDate">
+              Pendiente
+            </span>
+          </div>
+        </div>
+
+
+        <div
+          class="tracking-progress-step"
+          data-tracking-step="shipped"
+        >
+          <div class="tracking-progress-dot"></div>
+
+          <div>
+            <strong>Enviado</strong>
+            <span id="trackingShippedDate">
+              Pendiente
+            </span>
+          </div>
+        </div>
+
+
+        <div
+          class="tracking-progress-step"
+          data-tracking-step="delivered"
+        >
+          <div class="tracking-progress-dot"></div>
+
+          <div>
+            <strong>Entregado</strong>
+            <span id="trackingDeliveredDate">
+              Pendiente
+            </span>
+          </div>
+        </div>
+
+      </div>
+
+
+      <div
+        id="trackingShippingCard"
+        class="tracking-shipping-card"
+        hidden
+      >
+
+        <div class="tracking-card-title">
+          Información de envío
+        </div>
+
+
+        <div class="tracking-shipping-grid">
+
+          <div class="tracking-shipping-item">
+
+            <span>
+              Paquetería
+            </span>
+
+            <strong id="trackingCarrier">
+              —
+            </strong>
+
+          </div>
+
+
+          <div class="tracking-shipping-item">
+
+            <span>
+              Número de rastreo
+            </span>
+
+            <strong id="trackingNumber">
+              —
+            </strong>
+
+          </div>
+
+        </div>
+
+
+        <p class="tracking-shipping-note">
+          Puedes utilizar tu número de rastreo directamente
+          en el sitio oficial de la paquetería.
+        </p>
+
+      </div>
+
+
+      <div class="tracking-order-summary">
+
+        <div>
+
+          <span>
+            Estado del pago
+          </span>
+
+          <strong id="trackingPaymentStatus">
+            —
+          </strong>
+
+        </div>
+
+
+        <div>
+
+          <span>
+            Total del pedido
+          </span>
+
+          <strong id="trackingOrderTotal">
+            —
+          </strong>
+
+        </div>
+
+      </div>
+
+    </section>
+
+
+    <section class="tracking-help">
+
+      <div class="tracking-help-line"></div>
+
+      <p>
+        Si tienes alguna duda sobre tu pedido, utiliza el mismo
+        número de pedido al comunicarte con DUVANT12.
+      </p>
+
+    </section>
+
+  </main>
+
+
+  <footer class="tracking-footer">
+    <span>
+      DUVANT12 · Fragrances House
+    </span>
+  </footer>
+
+
+  <script src="rastrear-pedido.js"></script>
+</body>
+</html>
