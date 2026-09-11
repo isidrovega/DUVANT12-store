@@ -3152,3 +3152,27 @@ img {
     height: 210px;
   }
 }
+/* ==========================================
+   TRACK ORDER — HEADER
+========================================== */
+
+.desktop-nav .track-order-link {
+  padding: 9px 14px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 999px;
+  color: #b7bbc0;
+  transition:
+    color var(--transition),
+    border-color var(--transition),
+    background var(--transition);
+}
+
+.desktop-nav .track-order-link::after {
+  display: none;
+}
+
+.desktop-nav .track-order-link:hover {
+  border-color: rgba(255, 255, 255, 0.28);
+  background: rgba(255, 255, 255, 0.05);
+  color: #ffffff;
+}
