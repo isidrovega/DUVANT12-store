@@ -318,6 +318,141 @@
 .checkout-payment-error.visible {
   display: block;
 }
+
+/* ==========================================
+   ENVIATODO / SHIPPING
+========================================== */
+
+.checkout-shipping-section {
+  position: relative;
+}
+
+.checkout-shipping-status {
+  margin-top: 14px;
+  color: rgba(255, 255, 255, 0.52);
+  font-size: 12px;
+  line-height: 1.6;
+}
+
+.checkout-shipping-status.loading {
+  color: rgba(255, 255, 255, 0.72);
+}
+
+.checkout-shipping-status.success {
+  color: #b8cbb8;
+}
+
+.checkout-shipping-status.error {
+  color: #e8baba;
+}
+
+.checkout-shipping-rates {
+  display: grid;
+  gap: 10px;
+  margin-top: 16px;
+}
+
+.checkout-shipping-rate {
+  position: relative;
+  display: block;
+  cursor: pointer;
+}
+
+.checkout-shipping-rate input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.checkout-shipping-rate-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+
+  min-height: 76px;
+  padding: 16px 18px;
+
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.025);
+
+  transition:
+    border-color 180ms ease,
+    background 180ms ease,
+    transform 180ms ease;
+}
+
+.checkout-shipping-rate:hover
+.checkout-shipping-rate-card {
+  border-color: rgba(255, 255, 255, 0.22);
+  background: rgba(255, 255, 255, 0.045);
+}
+
+.checkout-shipping-rate input:checked
++ .checkout-shipping-rate-card {
+  border-color: rgba(255, 255, 255, 0.48);
+  background: rgba(255, 255, 255, 0.07);
+}
+
+.checkout-shipping-rate-info {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.checkout-shipping-rate-info strong {
+  color: #fff;
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.checkout-shipping-rate-info span {
+  color: rgba(255, 255, 255, 0.48);
+  font-size: 11px;
+  line-height: 1.5;
+}
+
+.checkout-shipping-rate-price {
+  flex-shrink: 0;
+
+  color: #fff;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.checkout-shipping-error {
+  display: block;
+  min-height: 18px;
+  margin-top: 10px;
+  color: #e8baba;
+  font-size: 11px;
+  line-height: 1.5;
+}
+
+.checkout-field select:disabled,
+.checkout-field input:read-only {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.checkout-field select {
+  width: 100%;
+}
+
+@media (max-width: 640px) {
+  .checkout-shipping-rate-card {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .checkout-shipping-rate-price {
+    font-size: 13px;
+  }
+}
+
   </style>
 </head>
 
@@ -568,170 +703,234 @@
             </section>
 
 
-            <!-- ADDRESS -->
+<!-- ADDRESS -->
 
-            <section class="checkout-form-section">
+<section class="checkout-form-section">
 
-              <div class="checkout-section-heading">
-                <span>02</span>
+  <div class="checkout-section-heading">
+    <span>02</span>
 
-                <div>
-                  <h2>Dirección de entrega</h2>
+    <div>
+      <h2>Dirección de entrega</h2>
 
-                  <p>
-                    Verifica cuidadosamente la
-                    información antes de continuar.
-                  </p>
-                </div>
-              </div>
-
-
-              <div class="checkout-fields-grid">
-
-                <div class="checkout-field checkout-field-full">
-                  <label for="address">
-                    Calle y número
-                  </label>
-
-                  <input
-                    id="address"
-                    name="address"
-                    type="text"
-                    autocomplete="street-address"
-                    maxlength="180"
-                    required
-                  >
-
-                  <small data-error-for="address"></small>
-                </div>
+      <p>
+        Ingresa tu código postal para completar
+        automáticamente tu ubicación.
+      </p>
+    </div>
+  </div>
 
 
-                <div class="checkout-field">
-                  <label for="address2">
-                    Interior
-                    <span>(opcional)</span>
-                  </label>
+  <div class="checkout-fields-grid">
 
-                  <input
-                    id="address2"
-                    name="address2"
-                    type="text"
-                    maxlength="80"
-                  >
+    <!-- POSTAL CODE -->
 
-                  <small data-error-for="address2"></small>
-                </div>
+    <div class="checkout-field">
+      <label for="postalCode">
+        Código postal
+      </label>
 
+      <input
+        id="postalCode"
+        name="postalCode"
+        type="text"
+        inputmode="numeric"
+        autocomplete="postal-code"
+        maxlength="5"
+        placeholder="00000"
+        required
+      >
 
-                <div class="checkout-field">
-                  <label for="neighborhood">
-                    Colonia
-                  </label>
-
-                  <input
-                    id="neighborhood"
-                    name="neighborhood"
-                    type="text"
-                    maxlength="120"
-                    required
-                  >
-
-                  <small data-error-for="neighborhood"></small>
-                </div>
+      <small data-error-for="postalCode"></small>
+    </div>
 
 
-                <div class="checkout-field">
-                  <label for="postalCode">
-                    Código postal
-                  </label>
+    <!-- NEIGHBORHOOD -->
 
-                  <input
-                    id="postalCode"
-                    name="postalCode"
-                    type="text"
-                    inputmode="numeric"
-                    autocomplete="postal-code"
-                    maxlength="5"
-                    required
-                  >
+    <div class="checkout-field">
+      <label for="neighborhood">
+        Colonia
+      </label>
 
-                  <small data-error-for="postalCode"></small>
-                </div>
+      <select
+        id="neighborhood"
+        name="neighborhood"
+        required
+        disabled
+      >
+        <option value="">
+          Primero ingresa tu código postal
+        </option>
+      </select>
 
-
-                <div class="checkout-field">
-                  <label for="city">
-                    Ciudad / Municipio
-                  </label>
-
-                  <input
-                    id="city"
-                    name="city"
-                    type="text"
-                    autocomplete="address-level2"
-                    maxlength="120"
-                    required
-                  >
-
-                  <small data-error-for="city"></small>
-                </div>
+      <small data-error-for="neighborhood"></small>
+    </div>
 
 
-                <div class="checkout-field checkout-field-full">
-                  <label for="state">
-                    Estado
-                  </label>
+    <!-- STREET -->
 
-                  <select
-                    id="state"
-                    name="state"
-                    autocomplete="address-level1"
-                    required
-                  >
-                    <option value="">
-                      Selecciona un estado
-                    </option>
+    <div class="checkout-field checkout-field-full">
+      <label for="street">
+        Calle
+      </label>
 
-                    <option value="Aguascalientes">Aguascalientes</option>
-                    <option value="Baja California">Baja California</option>
-                    <option value="Baja California Sur">Baja California Sur</option>
-                    <option value="Campeche">Campeche</option>
-                    <option value="Chiapas">Chiapas</option>
-                    <option value="Chihuahua">Chihuahua</option>
-                    <option value="Ciudad de México">Ciudad de México</option>
-                    <option value="Coahuila">Coahuila</option>
-                    <option value="Colima">Colima</option>
-                    <option value="Durango">Durango</option>
-                    <option value="Estado de México">Estado de México</option>
-                    <option value="Guanajuato">Guanajuato</option>
-                    <option value="Guerrero">Guerrero</option>
-                    <option value="Hidalgo">Hidalgo</option>
-                    <option value="Jalisco">Jalisco</option>
-                    <option value="Michoacán">Michoacán</option>
-                    <option value="Morelos">Morelos</option>
-                    <option value="Nayarit">Nayarit</option>
-                    <option value="Nuevo León">Nuevo León</option>
-                    <option value="Oaxaca">Oaxaca</option>
-                    <option value="Puebla">Puebla</option>
-                    <option value="Querétaro">Querétaro</option>
-                    <option value="Quintana Roo">Quintana Roo</option>
-                    <option value="San Luis Potosí">San Luis Potosí</option>
-                    <option value="Sinaloa">Sinaloa</option>
-                    <option value="Sonora">Sonora</option>
-                    <option value="Tabasco">Tabasco</option>
-                    <option value="Tamaulipas">Tamaulipas</option>
-                    <option value="Tlaxcala">Tlaxcala</option>
-                    <option value="Veracruz">Veracruz</option>
-                    <option value="Yucatán">Yucatán</option>
-                    <option value="Zacatecas">Zacatecas</option>
-                  </select>
+      <input
+        id="street"
+        name="street"
+        type="text"
+        autocomplete="address-line1"
+        maxlength="180"
+        required
+      >
 
-                  <small data-error-for="state"></small>
-                </div>
+      <small data-error-for="street"></small>
+    </div>
 
-              </div>
 
-            </section>
+    <!-- EXTERIOR NUMBER -->
+
+    <div class="checkout-field">
+      <label for="extNumber">
+        Número exterior
+      </label>
+
+      <input
+        id="extNumber"
+        name="extNumber"
+        type="text"
+        maxlength="40"
+        required
+      >
+
+      <small data-error-for="extNumber"></small>
+    </div>
+
+
+    <!-- INTERIOR NUMBER -->
+
+    <div class="checkout-field">
+      <label for="address2">
+        Número interior
+        <span>(opcional)</span>
+      </label>
+
+      <input
+        id="address2"
+        name="address2"
+        type="text"
+        maxlength="40"
+      >
+
+      <small data-error-for="address2"></small>
+    </div>
+
+
+    <!-- CITY / MUNICIPALITY -->
+
+    <div class="checkout-field">
+      <label for="city">
+        Ciudad / Municipio
+      </label>
+
+      <input
+        id="city"
+        name="city"
+        type="text"
+        autocomplete="address-level2"
+        maxlength="120"
+        readonly
+        required
+      >
+
+      <small data-error-for="city"></small>
+    </div>
+
+
+    <!-- STATE -->
+
+    <div class="checkout-field">
+      <label for="state">
+        Estado
+      </label>
+
+      <input
+        id="state"
+        name="state"
+        type="text"
+        autocomplete="address-level1"
+        maxlength="120"
+        readonly
+        required
+      >
+
+      <small data-error-for="state"></small>
+    </div>
+
+
+    <!-- INTERNAL ENVIATODO DATA -->
+
+    <input
+      id="stateCode"
+      name="stateCode"
+      type="hidden"
+    >
+
+  </div>
+
+
+  <!-- ZIP CODE STATUS -->
+
+  <div
+    id="checkoutZipStatus"
+    class="checkout-shipping-status"
+    aria-live="polite"
+  ></div>
+
+</section>
+
+
+<!-- SHIPPING -->
+
+<section
+  id="checkoutShippingSection"
+  class="checkout-form-section checkout-shipping-section"
+>
+
+  <div class="checkout-section-heading">
+    <span>03</span>
+
+    <div>
+      <h2>Método de envío</h2>
+
+      <p>
+        Calcularemos las opciones disponibles
+        para tu dirección.
+      </p>
+    </div>
+  </div>
+
+
+  <div
+    id="checkoutShippingStatus"
+    class="checkout-shipping-status"
+    aria-live="polite"
+  >
+    Completa tu dirección para calcular el envío.
+  </div>
+
+
+  <div
+    id="checkoutShippingRates"
+    class="checkout-shipping-rates"
+  ></div>
+
+
+  <small
+    id="checkoutShippingError"
+    class="checkout-shipping-error"
+  ></small>
+
+</section>
 
 
             <!-- NOTES -->
@@ -739,7 +938,7 @@
             <section class="checkout-form-section">
 
               <div class="checkout-section-heading">
-                <span>03</span>
+                <span>04</span>
 
                 <div>
                   <h2>Indicaciones</h2>
@@ -829,76 +1028,70 @@
           ========================== -->
 
           <section
-            id="checkoutPaymentSection"
-            class="checkout-payment-section"
-            hidden
-          >
-
-            <div class="checkout-section-heading">
-              <span>04</span>
-
-              <div>
-                <h2>Pago seguro</h2>
-
-                <p>
-                  Ingresa los datos de tu tarjeta
-                  para completar la compra.
-                </p>
-              </div>
-            </div>
-
-
-            <div class="checkout-payment-order">
-
-              <div>
-                <span>Pedido</span>
-
-                <strong id="checkoutPaymentOrderNumber">
-                  —
-                </strong>
-              </div>
-
-
-              <div class="checkout-payment-order-total">
-                <span>Total a pagar</span>
-
-                <strong id="checkoutPaymentTotal">
-                  $0
-                </strong>
-              </div>
-
-            </div>
-
-
-            <div
-              id="checkoutPaymentLoading"
-              class="checkout-payment-loading"
-            >
-              Preparando pago seguro...
-            </div>
-
-
-            <div
-  id="checkoutPaymentLoading"
-  class="checkout-payment-loading"
+  id="checkoutPaymentSection"
+  class="checkout-payment-section"
+  hidden
 >
-  Preparando pago seguro...
-</div>
 
-<div
-  id="cardPaymentBrick_container"
-  class="checkout-payment-brick"
-></div>
+  <div class="checkout-section-heading">
+    <span>05</span>
 
-<div
-  id="checkoutPaymentError"
-  class="checkout-payment-error"
-  role="alert"
-></div>
-          </section>
+    <div>
+      <h2>Pago seguro</h2>
 
-        </section>
+      <p>
+        Ingresa los datos de tu tarjeta
+        para completar la compra.
+      </p>
+    </div>
+  </div>
 
+
+  <div class="checkout-payment-order">
+
+    <div>
+      <span>Pedido</span>
+
+      <strong id="checkoutPaymentOrderNumber">
+        —
+      </strong>
+    </div>
+
+
+    <div class="checkout-payment-order-total">
+      <span>Total a pagar</span>
+
+      <strong id="checkoutPaymentTotal">
+        $0
+      </strong>
+    </div>
+
+  </div>
+
+
+  <div
+    id="checkoutPaymentLoading"
+    class="checkout-payment-loading"
+  >
+    Preparando pago seguro...
+  </div>
+
+
+  <div
+    id="cardPaymentBrick_container"
+    class="checkout-payment-brick"
+  ></div>
+
+
+  <div
+    id="checkoutPaymentError"
+    class="checkout-payment-error"
+    role="alert"
+  ></div>
+
+</section>
+
+</section>
 
         <!-- =========================
              ORDER SUMMARY
@@ -940,12 +1133,12 @@
 
 
               <div>
-                <span>Envío</span>
+  <span>Envío</span>
 
-                <strong>
-                  Por calcular
-                </strong>
-              </div>
+  <strong id="checkoutShippingTotal">
+    Por calcular
+  </strong>
+</div>
 
 
               <div class="checkout-summary-total">

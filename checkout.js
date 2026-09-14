@@ -1,7 +1,8 @@
 "use strict";
 
 /* ==========================================
-   DUVANT 12 — CHECKOUT + MERCADO PAGO
+   DUVANT 12 — CHECKOUT
+   ENVIATODO + MERCADO PAGO
 ========================================== */
 
 const store = window.DuvantStore;
@@ -57,6 +58,17 @@ const CONFIRMATION_REDIRECT_DELAY =
 
 
 /* ==========================================
+   SHIPPING
+========================================== */
+
+const ZIP_LOOKUP_DELAY =
+  350;
+
+const SHIPPING_QUOTE_DELAY =
+  850;
+
+
+/* ==========================================
    STATE
 ========================================== */
 
@@ -70,11 +82,40 @@ let creatingOrder = false;
 
 let paymentConfirmationIsRunning = false;
 
-let backgroundPaymentMonitorIsRunning = false;
+let backgroundPaymentMonitorIsRunning =
+  false;
 
 let paymentWasConfirmed = false;
 
-let confirmationRedirectScheduled = false;
+let confirmationRedirectScheduled =
+  false;
+
+
+/* ==========================================
+   SHIPPING STATE
+========================================== */
+
+let zipLookupTimer = null;
+
+let shippingQuoteTimer = null;
+
+let zipLookupSequence = 0;
+
+let shippingQuoteSequence = 0;
+
+let zipLookupIsRunning = false;
+
+let shippingQuoteIsRunning = false;
+
+let activeZipCode = "";
+
+let activeShippingQuote = null;
+
+let activeShippingFingerprint = "";
+
+let selectedShippingRate = null;
+
+let draftNeighborhoodToRestore = "";
 
 
 /* ==========================================
@@ -131,9 +172,74 @@ const checkoutSubtotal =
     "checkoutSubtotal"
   );
 
+const checkoutShippingTotal =
+  document.getElementById(
+    "checkoutShippingTotal"
+  );
+
 const checkoutTotal =
   document.getElementById(
     "checkoutTotal"
+  );
+
+
+/* ==========================================
+   ADDRESS DOM
+========================================== */
+
+const postalCodeField =
+  document.getElementById(
+    "postalCode"
+  );
+
+const neighborhoodField =
+  document.getElementById(
+    "neighborhood"
+  );
+
+const cityField =
+  document.getElementById(
+    "city"
+  );
+
+const stateField =
+  document.getElementById(
+    "state"
+  );
+
+const stateCodeField =
+  document.getElementById(
+    "stateCode"
+  );
+
+const checkoutZipStatus =
+  document.getElementById(
+    "checkoutZipStatus"
+  );
+
+
+/* ==========================================
+   SHIPPING DOM
+========================================== */
+
+const checkoutShippingSection =
+  document.getElementById(
+    "checkoutShippingSection"
+  );
+
+const checkoutShippingStatus =
+  document.getElementById(
+    "checkoutShippingStatus"
+  );
+
+const checkoutShippingRates =
+  document.getElementById(
+    "checkoutShippingRates"
+  );
+
+const checkoutShippingError =
+  document.getElementById(
+    "checkoutShippingError"
   );
 
 
@@ -262,6 +368,28 @@ function wait(milliseconds) {
 }
 
 
+function moneyValue(value) {
+  const number =
+    Number(
+      value
+    );
+
+  if (
+    !Number.isFinite(
+      number
+    )
+  ) {
+    return 0;
+  }
+
+  return Number(
+    number.toFixed(
+      2
+    )
+  );
+}
+
+
 /* ==========================================
    REQUEST ID
 ========================================== */
@@ -362,7 +490,9 @@ function saveConfirmedOrderForRedirect(
     console.error(
       "DUVANT 12 — No fue posible guardar la confirmación del pedido:",
       {
-        order_id: orderId,
+        order_id:
+          orderId,
+
         has_client_request_id:
           Boolean(
             clientRequestId
@@ -482,7 +612,7 @@ function populateDraft() {
     loadDraft();
 
   if (!draft) {
-    return;
+    return null;
   }
 
   const fields = [
@@ -490,12 +620,10 @@ function populateDraft() {
     "lastName",
     "email",
     "phone",
-    "address",
+    "street",
+    "extNumber",
     "address2",
-    "neighborhood",
     "postalCode",
-    "city",
-    "state",
     "notes"
   ];
 
@@ -516,6 +644,13 @@ function populateDraft() {
       }
     }
   );
+
+  draftNeighborhoodToRestore =
+    sanitizeText(
+      draft.neighborhood
+    );
+
+  return draft;
 }
 
 
@@ -597,6 +732,17 @@ function createSummaryItem(item) {
 }
 
 
+function getSelectedShippingPrice() {
+  if (!selectedShippingRate) {
+    return 0;
+  }
+
+  return moneyValue(
+    selectedShippingRate.price
+  );
+}
+
+
 function renderSummary() {
   const items =
     store.getCartItems();
@@ -605,7 +751,22 @@ function renderSummary() {
     store.getCartCount();
 
   const subtotal =
-    store.getCartSubtotal();
+    moneyValue(
+      store.getCartSubtotal()
+    );
+
+  const shipping =
+    getSelectedShippingPrice();
+
+  const total =
+    Number(
+      (
+        subtotal +
+        shipping
+      ).toFixed(
+        2
+      )
+    );
 
   checkoutSummaryProducts.innerHTML =
     items
@@ -624,9 +785,20 @@ function renderSummary() {
       subtotal
     );
 
+  if (selectedShippingRate) {
+    checkoutShippingTotal.textContent =
+      store.formatCurrency(
+        shipping
+      );
+
+  } else {
+    checkoutShippingTotal.textContent =
+      "Por calcular";
+  }
+
   checkoutTotal.textContent =
     store.formatCurrency(
-      subtotal
+      total
     );
 
   store.updateCartIndicators();
@@ -656,6 +828,9 @@ function clearFieldErrors() {
       element.textContent =
         "";
     });
+
+  checkoutShippingError.textContent =
+    "";
 }
 
 
@@ -732,10 +907,17 @@ function getFormData() {
         )
       ),
 
-    address:
+    street:
       sanitizeText(
         formData.get(
-          "address"
+          "street"
+        )
+      ),
+
+    extNumber:
+      sanitizeText(
+        formData.get(
+          "extNumber"
         )
       ),
 
@@ -774,6 +956,13 @@ function getFormData() {
         )
       ),
 
+    stateCode:
+      sanitizeText(
+        formData.get(
+          "stateCode"
+        )
+      ),
+
     notes:
       sanitizeText(
         formData.get(
@@ -786,6 +975,1366 @@ function getFormData() {
         "terms"
       ) === "on"
   };
+}
+
+
+/* ==========================================
+   SHIPPING FINGERPRINT
+========================================== */
+
+function getCartShippingFingerprint() {
+  const items =
+    store.getCartItems();
+
+  return items
+    .map(
+      item => ({
+        id:
+          sanitizeText(
+            item.product?.id
+          ),
+
+        quantity:
+          Number(
+            item.quantity
+          )
+      })
+    )
+    .sort(
+      (a, b) =>
+        a.id.localeCompare(
+          b.id
+        )
+    );
+}
+
+
+function createShippingFingerprint(
+  data
+) {
+  return JSON.stringify({
+    firstName:
+      data.firstName,
+
+    lastName:
+      data.lastName,
+
+    email:
+      data.email,
+
+    phone:
+      data.phone,
+
+    street:
+      data.street,
+
+    extNumber:
+      data.extNumber,
+
+    address2:
+      data.address2,
+
+    neighborhood:
+      data.neighborhood,
+
+    postalCode:
+      data.postalCode,
+
+    city:
+      data.city,
+
+    state:
+      data.state,
+
+    stateCode:
+      data.stateCode,
+
+    items:
+      getCartShippingFingerprint()
+  });
+}
+
+
+/* ==========================================
+   SHIPPING UI HELPERS
+========================================== */
+
+function setZipStatus(
+  message,
+  type = ""
+) {
+  checkoutZipStatus.textContent =
+    message;
+
+  checkoutZipStatus.classList.remove(
+    "loading",
+    "success",
+    "error"
+  );
+
+  if (type) {
+    checkoutZipStatus.classList.add(
+      type
+    );
+  }
+}
+
+
+function setShippingStatus(
+  message,
+  type = ""
+) {
+  checkoutShippingStatus.textContent =
+    message;
+
+  checkoutShippingStatus.classList.remove(
+    "loading",
+    "success",
+    "error"
+  );
+
+  if (type) {
+    checkoutShippingStatus.classList.add(
+      type
+    );
+  }
+}
+
+
+function setShippingError(
+  message = ""
+) {
+  checkoutShippingError.textContent =
+    message;
+}
+
+
+/* ==========================================
+   SHIPPING RESET
+========================================== */
+
+function resetShippingSelection({
+  clearRates = true,
+  clearQuote = true
+} = {}) {
+  selectedShippingRate =
+    null;
+
+  if (clearQuote) {
+    activeShippingQuote =
+      null;
+
+    activeShippingFingerprint =
+      "";
+  }
+
+  if (clearRates) {
+    checkoutShippingRates.innerHTML =
+      "";
+  }
+
+  setShippingError(
+    ""
+  );
+
+  renderSummary();
+}
+
+
+function invalidateShippingQuote(
+  message =
+    "Completa tu dirección para calcular el envío."
+) {
+  shippingQuoteSequence +=
+    1;
+
+  shippingQuoteIsRunning =
+    false;
+
+  if (shippingQuoteTimer) {
+    window.clearTimeout(
+      shippingQuoteTimer
+    );
+
+    shippingQuoteTimer =
+      null;
+  }
+
+  resetShippingSelection();
+
+  setShippingStatus(
+    message
+  );
+}
+
+
+/* ==========================================
+   ZIP RESET
+========================================== */
+
+function clearLocationFields() {
+  neighborhoodField.innerHTML = `
+    <option value="">
+      Primero ingresa tu código postal
+    </option>
+  `;
+
+  neighborhoodField.disabled =
+    true;
+
+  cityField.value =
+    "";
+
+  stateField.value =
+    "";
+
+  stateCodeField.value =
+    "";
+
+  activeZipCode =
+    "";
+}
+
+
+/* ==========================================
+   ZIP LOOKUP
+========================================== */
+
+async function lookupPostalCode(
+  postalCode,
+  {
+    restoreNeighborhood = ""
+  } = {}
+) {
+  const normalizedPostalCode =
+    normalizePostalCode(
+      postalCode
+    );
+
+  if (
+    normalizedPostalCode.length !==
+    5
+  ) {
+    clearLocationFields();
+
+    setZipStatus(
+      ""
+    );
+
+    invalidateShippingQuote();
+
+    return false;
+  }
+
+  const sequence =
+    ++zipLookupSequence;
+
+  zipLookupIsRunning =
+    true;
+
+  neighborhoodField.disabled =
+    true;
+
+  setZipStatus(
+    "Buscando código postal...",
+    "loading"
+  );
+
+  try {
+    const {
+      data,
+      error
+    } =
+      await window.storeSupabase
+        .functions
+        .invoke(
+          "enviatodo-zipcode",
+          {
+            body: {
+              zip_code:
+                normalizedPostalCode
+            }
+          }
+        );
+
+    if (
+      sequence !==
+      zipLookupSequence
+    ) {
+      return false;
+    }
+
+    if (error) {
+      console.error(
+        "enviatodo-zipcode:",
+        error
+      );
+
+      throw new Error(
+        "ZIP_LOOKUP_ERROR"
+      );
+    }
+
+    if (
+      !data ||
+      data.success !== true ||
+      !data.location
+    ) {
+      console.error(
+        "Respuesta enviatodo-zipcode:",
+        data
+      );
+
+      throw new Error(
+        "ZIP_LOOKUP_INVALID"
+      );
+    }
+
+    const location =
+      data.location;
+
+    const suburbs =
+      Array.isArray(
+        data.suburbs
+      )
+        ? data.suburbs
+        : [];
+
+    cityField.value =
+      sanitizeText(
+        location.municipality ||
+        location.city
+      );
+
+    stateField.value =
+      sanitizeText(
+        location.state
+      );
+
+    stateCodeField.value =
+      sanitizeText(
+        location.state_code
+      );
+
+    activeZipCode =
+      normalizedPostalCode;
+
+    neighborhoodField.innerHTML =
+      "";
+
+    const defaultOption =
+      document.createElement(
+        "option"
+      );
+
+    defaultOption.value =
+      "";
+
+    defaultOption.textContent =
+      suburbs.length
+        ? "Selecciona tu colonia"
+        : "No se encontraron colonias";
+
+    neighborhoodField.appendChild(
+      defaultOption
+    );
+
+    suburbs.forEach(
+      suburb => {
+        const name =
+          sanitizeText(
+            typeof suburb === "string"
+              ? suburb
+              : suburb?.name
+          );
+
+        if (!name) {
+          return;
+        }
+
+        const option =
+          document.createElement(
+            "option"
+          );
+
+        option.value =
+          name;
+
+        option.textContent =
+          name;
+
+        neighborhoodField.appendChild(
+          option
+        );
+      }
+    );
+
+    neighborhoodField.disabled =
+      suburbs.length === 0;
+
+    const neighborhoodToRestore =
+      sanitizeText(
+        restoreNeighborhood ||
+        draftNeighborhoodToRestore
+      );
+
+    if (
+      neighborhoodToRestore &&
+      suburbs.some(
+        suburb =>
+          sanitizeText(
+            typeof suburb === "string"
+              ? suburb
+              : suburb?.name
+          ) ===
+          neighborhoodToRestore
+      )
+    ) {
+      neighborhoodField.value =
+        neighborhoodToRestore;
+    }
+
+    draftNeighborhoodToRestore =
+      "";
+
+    setZipStatus(
+      `${cityField.value}, ${stateField.value}`,
+      "success"
+    );
+
+    saveCurrentDraft();
+
+    scheduleShippingQuote();
+
+    return true;
+
+  } catch (error) {
+    console.error(
+      "Error consultando código postal:",
+      error
+    );
+
+    if (
+      sequence !==
+      zipLookupSequence
+    ) {
+      return false;
+    }
+
+    clearLocationFields();
+
+    setZipStatus(
+      "No pudimos validar ese código postal.",
+      "error"
+    );
+
+    invalidateShippingQuote(
+      "Verifica tu código postal para calcular el envío."
+    );
+
+    return false;
+
+  } finally {
+    if (
+      sequence ===
+      zipLookupSequence
+    ) {
+      zipLookupIsRunning =
+        false;
+    }
+  }
+}
+
+
+function schedulePostalCodeLookup() {
+  if (zipLookupTimer) {
+    window.clearTimeout(
+      zipLookupTimer
+    );
+  }
+
+  const postalCode =
+    normalizePostalCode(
+      postalCodeField.value
+    );
+
+  if (
+    postalCode.length !==
+    5
+  ) {
+    zipLookupSequence +=
+      1;
+
+    clearLocationFields();
+
+    setZipStatus(
+      ""
+    );
+
+    invalidateShippingQuote();
+
+    return;
+  }
+
+  if (
+    postalCode ===
+      activeZipCode &&
+    cityField.value &&
+    stateField.value
+  ) {
+    scheduleShippingQuote();
+
+    return;
+  }
+
+  clearLocationFields();
+
+  invalidateShippingQuote(
+    "Validando código postal..."
+  );
+
+  zipLookupTimer =
+    window.setTimeout(
+      () => {
+        void lookupPostalCode(
+          postalCode
+        );
+      },
+      ZIP_LOOKUP_DELAY
+    );
+}
+
+
+/* ==========================================
+   RATE NORMALIZATION
+========================================== */
+
+function getRatePrice(
+  rate
+) {
+  const candidates = [
+    rate?.price,
+    rate?.shipping_total,
+    rate?.total,
+    rate?.amount,
+    rate?.charge_total,
+    rate?.charges?.total,
+    rate?.charges?.base?.total
+  ];
+
+  for (
+    const candidate of candidates
+  ) {
+    const value =
+      Number(
+        candidate
+      );
+
+    if (
+      Number.isFinite(
+        value
+      ) &&
+      value >= 0
+    ) {
+      return Number(
+        value.toFixed(
+          2
+        )
+      );
+    }
+  }
+
+  return NaN;
+}
+
+
+function normalizeShippingRate(
+  rawRate
+) {
+  const providerId =
+    sanitizeText(
+      rawRate?.provider_id
+    );
+
+  const providerServiceId =
+    sanitizeText(
+      rawRate?.provider_service_id
+    );
+
+  const price =
+    getRatePrice(
+      rawRate
+    );
+
+  if (
+    !providerId ||
+    !providerServiceId ||
+    !Number.isFinite(
+      price
+    )
+  ) {
+    return null;
+  }
+
+  return {
+    provider_id:
+      providerId,
+
+    provider_service_id:
+      providerServiceId,
+
+    provider_name:
+      sanitizeText(
+        rawRate?.provider_name ||
+        rawRate?.provider
+      ),
+
+    service_name:
+      sanitizeText(
+        rawRate?.service_name ||
+        rawRate?.service
+      ),
+
+    via_transport:
+      sanitizeText(
+        rawRate?.via_transport
+      ),
+
+    delivery_mode:
+      sanitizeText(
+        rawRate?.delivery_mode
+      ),
+
+    estimated_date:
+      sanitizeText(
+        rawRate?.estimated_date
+      ),
+
+    status:
+      sanitizeText(
+        rawRate?.status
+      ),
+
+    price
+  };
+}
+
+
+/* ==========================================
+   ESTIMATED DATE
+========================================== */
+
+function formatEstimatedDate(
+  value
+) {
+  const text =
+    sanitizeText(
+      value
+    );
+
+  if (!text) {
+    return "";
+  }
+
+  const timestamp =
+    Date.parse(
+      text
+    );
+
+  if (
+    Number.isNaN(
+      timestamp
+    )
+  ) {
+    return text;
+  }
+
+  try {
+    return new Intl.DateTimeFormat(
+      "es-MX",
+      {
+        day: "numeric",
+        month: "short"
+      }
+    ).format(
+      new Date(
+        timestamp
+      )
+    );
+
+  } catch {
+    return text;
+  }
+}
+
+
+/* ==========================================
+   RENDER SHIPPING RATES
+========================================== */
+
+function renderShippingRates(
+  quote
+) {
+  checkoutShippingRates.innerHTML =
+    "";
+
+  selectedShippingRate =
+    null;
+
+  const rates =
+    Array.isArray(
+      quote?.rates
+    )
+      ? quote.rates
+          .map(
+            normalizeShippingRate
+          )
+          .filter(
+            Boolean
+          )
+          .sort(
+            (a, b) =>
+              a.price -
+              b.price
+          )
+      : [];
+
+  if (!rates.length) {
+    setShippingStatus(
+      "No encontramos métodos de envío disponibles para esta dirección.",
+      "error"
+    );
+
+    setShippingError(
+      "Prueba verificando tu dirección o intenta nuevamente."
+    );
+
+    renderSummary();
+
+    return;
+  }
+
+  rates.forEach(
+    (
+      rate,
+      index
+    ) => {
+      const label =
+        document.createElement(
+          "label"
+        );
+
+      label.className =
+        "checkout-shipping-rate";
+
+      const input =
+        document.createElement(
+          "input"
+        );
+
+      input.type =
+        "radio";
+
+      input.name =
+        "shippingRate";
+
+      input.value =
+        `${rate.provider_id}:${rate.provider_service_id}`;
+
+      input.dataset.index =
+        String(
+          index
+        );
+
+      const card =
+        document.createElement(
+          "span"
+        );
+
+      card.className =
+        "checkout-shipping-rate-card";
+
+      const info =
+        document.createElement(
+          "span"
+        );
+
+      info.className =
+        "checkout-shipping-rate-info";
+
+      const title =
+        document.createElement(
+          "strong"
+        );
+
+      title.textContent =
+        rate.service_name ||
+        rate.provider_name ||
+        "Envío";
+
+      const details =
+        document.createElement(
+          "span"
+        );
+
+      const detailParts =
+        [];
+
+      if (
+        rate.provider_name &&
+        rate.provider_name !==
+          rate.service_name
+      ) {
+        detailParts.push(
+          rate.provider_name
+        );
+      }
+
+      if (rate.delivery_mode) {
+        detailParts.push(
+          rate.delivery_mode
+        );
+      }
+
+      if (rate.via_transport) {
+        detailParts.push(
+          rate.via_transport
+        );
+      }
+
+      const estimatedDate =
+        formatEstimatedDate(
+          rate.estimated_date
+        );
+
+      if (estimatedDate) {
+        detailParts.push(
+          `Entrega estimada: ${estimatedDate}`
+        );
+      }
+
+      details.textContent =
+        detailParts.join(
+          " · "
+        ) ||
+        "Servicio disponible";
+
+      const price =
+        document.createElement(
+          "strong"
+        );
+
+      price.className =
+        "checkout-shipping-rate-price";
+
+      price.textContent =
+        store.formatCurrency(
+          rate.price
+        );
+
+      info.append(
+        title,
+        details
+      );
+
+      card.append(
+        info,
+        price
+      );
+
+      label.append(
+        input,
+        card
+      );
+
+      input.addEventListener(
+        "change",
+        () => {
+          if (!input.checked) {
+            return;
+          }
+
+          selectedShippingRate =
+            rate;
+
+          setShippingError(
+            ""
+          );
+
+          setShippingStatus(
+            "Método de envío seleccionado.",
+            "success"
+          );
+
+          renderSummary();
+
+          saveCurrentDraft();
+        }
+      );
+
+      checkoutShippingRates.appendChild(
+        label
+      );
+    }
+  );
+
+  setShippingStatus(
+    "Selecciona el método de envío que prefieras.",
+    "success"
+  );
+
+  renderSummary();
+}
+
+
+/* ==========================================
+   SHIPPING DATA READY
+========================================== */
+
+function shippingDataIsComplete(
+  data
+) {
+  return (
+    data.firstName.length >= 2 &&
+    data.lastName.length >= 2 &&
+    isValidEmail(
+      data.email
+    ) &&
+    data.phone.length === 10 &&
+    data.street.length >= 2 &&
+    data.extNumber.length >= 1 &&
+    data.neighborhood.length >= 2 &&
+    data.postalCode.length === 5 &&
+    data.city.length >= 2 &&
+    data.state.length >= 2 &&
+    data.stateCode.length >= 2
+  );
+}
+
+
+/* ==========================================
+   SHIPPING RATE REQUEST
+========================================== */
+
+function buildShippingRateRequest(
+  data
+) {
+  const fullName =
+    `${data.firstName} ${data.lastName}`
+      .replace(
+        /\s+/g,
+        " "
+      )
+      .trim();
+
+  return {
+    destination: {
+      full_name:
+        fullName,
+
+      email:
+        data.email,
+
+      telephone:
+        data.phone,
+
+      street:
+        data.street,
+
+      ext_number:
+        data.extNumber,
+
+      int_number:
+        data.address2,
+
+      zip_code:
+        data.postalCode,
+
+      suburb:
+        data.neighborhood,
+
+      municipality:
+        data.city,
+
+      town:
+        data.city,
+
+      state:
+        data.state,
+
+      state_code:
+        data.stateCode,
+
+      country_code:
+        "MX",
+
+      reference:
+        data.notes,
+
+      default_addr:
+        "false"
+    },
+
+    /*
+      El frontend NO envía shipping_total.
+
+      Los items se incluyen para que el backend
+      pueda utilizarlos posteriormente para
+      determinar paquete/valor declarado de
+      forma autoritativa.
+    */
+
+    items:
+      store
+        .getCartItems()
+        .map(
+          item => ({
+            perfume_id:
+              item.product.id,
+
+            quantity:
+              Number(
+                item.quantity
+              )
+          })
+        )
+  };
+}
+
+
+/* ==========================================
+   REQUEST SHIPPING RATES
+========================================== */
+
+async function requestShippingRates({
+  force = false
+} = {}) {
+  if (
+    activeOrder ||
+    creatingOrder
+  ) {
+    return false;
+  }
+
+  const customerData =
+    getFormData();
+
+  if (
+    customerData.postalCode !==
+      activeZipCode ||
+    !shippingDataIsComplete(
+      customerData
+    )
+  ) {
+    invalidateShippingQuote(
+      "Completa tus datos y dirección para calcular el envío."
+    );
+
+    return false;
+  }
+
+  const fingerprint =
+    createShippingFingerprint(
+      customerData
+    );
+
+  if (
+    !force &&
+    activeShippingQuote &&
+    activeShippingFingerprint ===
+      fingerprint
+  ) {
+    return true;
+  }
+
+  const sequence =
+    ++shippingQuoteSequence;
+
+  shippingQuoteIsRunning =
+    true;
+
+  selectedShippingRate =
+    null;
+
+  checkoutShippingRates.innerHTML =
+    "";
+
+  renderSummary();
+
+  setShippingError(
+    ""
+  );
+
+  setShippingStatus(
+    "Calculando opciones de envío...",
+    "loading"
+  );
+
+  try {
+    const requestBody =
+      buildShippingRateRequest(
+        customerData
+      );
+
+    const {
+      data,
+      error
+    } =
+      await window.storeSupabase
+        .functions
+        .invoke(
+          "enviatodo-rates",
+          {
+            body:
+              requestBody
+          }
+        );
+
+    if (
+      sequence !==
+      shippingQuoteSequence
+    ) {
+      return false;
+    }
+
+    if (error) {
+      console.error(
+        "enviatodo-rates:",
+        error
+      );
+
+      throw new Error(
+        "SHIPPING_RATES_ERROR"
+      );
+    }
+
+    if (
+      !data ||
+      data.success !== true ||
+      !data.quote ||
+      !sanitizeText(
+        data.quote.uuid
+      )
+    ) {
+      console.error(
+        "Respuesta enviatodo-rates:",
+        data
+      );
+
+      throw new Error(
+        "SHIPPING_RATES_INVALID"
+      );
+    }
+
+    const currentData =
+      getFormData();
+
+    const currentFingerprint =
+      createShippingFingerprint(
+        currentData
+      );
+
+    /*
+      Si el cliente cambió la dirección
+      mientras la API respondía, ignoramos
+      completamente esta cotización.
+    */
+
+    if (
+      currentFingerprint !==
+      fingerprint
+    ) {
+      return false;
+    }
+
+    activeShippingQuote = {
+      uuid:
+        sanitizeText(
+          data.quote.uuid
+        ),
+
+      timestamp:
+        data.quote.timestamp ||
+        null,
+
+      rates:
+        Array.isArray(
+          data.quote.rates
+        )
+          ? data.quote.rates
+          : []
+    };
+
+    activeShippingFingerprint =
+      fingerprint;
+
+    renderShippingRates(
+      activeShippingQuote
+    );
+
+    return true;
+
+  } catch (error) {
+    console.error(
+      "Error calculando envío:",
+      error
+    );
+
+    if (
+      sequence !==
+      shippingQuoteSequence
+    ) {
+      return false;
+    }
+
+    activeShippingQuote =
+      null;
+
+    activeShippingFingerprint =
+      "";
+
+    selectedShippingRate =
+      null;
+
+    checkoutShippingRates.innerHTML =
+      "";
+
+    setShippingStatus(
+      "No fue posible calcular el envío.",
+      "error"
+    );
+
+    setShippingError(
+      "Verifica los datos de entrega e inténtalo nuevamente."
+    );
+
+    renderSummary();
+
+    return false;
+
+  } finally {
+    if (
+      sequence ===
+      shippingQuoteSequence
+    ) {
+      shippingQuoteIsRunning =
+        false;
+    }
+  }
+}
+
+
+/* ==========================================
+   SCHEDULE SHIPPING
+========================================== */
+
+function scheduleShippingQuote() {
+  if (
+    activeOrder ||
+    creatingOrder
+  ) {
+    return;
+  }
+
+  if (shippingQuoteTimer) {
+    window.clearTimeout(
+      shippingQuoteTimer
+    );
+  }
+
+  const data =
+    getFormData();
+
+  if (
+    data.postalCode !==
+      activeZipCode ||
+    !shippingDataIsComplete(
+      data
+    )
+  ) {
+    invalidateShippingQuote(
+      "Completa tus datos y dirección para calcular el envío."
+    );
+
+    return;
+  }
+
+  const fingerprint =
+    createShippingFingerprint(
+      data
+    );
+
+  if (
+    activeShippingQuote &&
+    activeShippingFingerprint ===
+      fingerprint
+  ) {
+    return;
+  }
+
+  invalidateShippingQuote(
+    "Actualizando cotización de envío..."
+  );
+
+  shippingQuoteTimer =
+    window.setTimeout(
+      () => {
+        void requestShippingRates();
+      },
+      SHIPPING_QUOTE_DELAY
+    );
+}
+
+
+/* ==========================================
+   ENSURE SHIPPING BEFORE ORDER
+========================================== */
+
+async function ensureShippingSelection() {
+  const data =
+    getFormData();
+
+  if (
+    !shippingDataIsComplete(
+      data
+    )
+  ) {
+    return false;
+  }
+
+  const fingerprint =
+    createShippingFingerprint(
+      data
+    );
+
+  if (
+    !activeShippingQuote ||
+    activeShippingFingerprint !==
+      fingerprint
+  ) {
+    const success =
+      await requestShippingRates({
+        force: true
+      });
+
+    if (!success) {
+      return false;
+    }
+  }
+
+  if (!selectedShippingRate) {
+    setShippingError(
+      "Selecciona un método de envío antes de continuar."
+    );
+
+    scrollToElement(
+      checkoutShippingSection
+    );
+
+    return false;
+  }
+
+  return true;
 }
 
 
@@ -832,22 +2381,6 @@ function validateForm(data) {
   }
 
   if (
-    data.address.length <
-    5
-  ) {
-    errors.address =
-      "Ingresa calle y número.";
-  }
-
-  if (
-    data.neighborhood.length <
-    2
-  ) {
-    errors.neighborhood =
-      "Ingresa tu colonia.";
-  }
-
-  if (
     data.postalCode.length !==
     5
   ) {
@@ -856,16 +2389,50 @@ function validateForm(data) {
   }
 
   if (
+    data.neighborhood.length <
+    2
+  ) {
+    errors.neighborhood =
+      "Selecciona tu colonia.";
+  }
+
+  if (
+    data.street.length <
+    2
+  ) {
+    errors.street =
+      "Ingresa tu calle.";
+  }
+
+  if (
+    data.extNumber.length <
+    1
+  ) {
+    errors.extNumber =
+      "Ingresa el número exterior.";
+  }
+
+  if (
     data.city.length <
     2
   ) {
     errors.city =
-      "Ingresa tu ciudad o municipio.";
+      "No pudimos determinar tu ciudad o municipio.";
   }
 
-  if (!data.state) {
+  if (
+    data.state.length <
+    2
+  ) {
     errors.state =
-      "Selecciona tu estado.";
+      "No pudimos determinar tu estado.";
+  }
+
+  if (
+    !data.stateCode
+  ) {
+    errors.postalCode =
+      "Vuelve a validar tu código postal.";
   }
 
   if (!data.terms) {
@@ -901,6 +2468,7 @@ function validateForm(data) {
       field.scrollIntoView({
         behavior:
           "smooth",
+
         block:
           "center"
       });
@@ -922,8 +2490,34 @@ function validateForm(data) {
 function buildOrderRequest(
   customerData
 ) {
+  if (
+    !activeShippingQuote ||
+    !selectedShippingRate
+  ) {
+    throw new Error(
+      "SHIPPING_NOT_SELECTED"
+    );
+  }
+
   const items =
     store.getCartItems();
+
+  /*
+    create-order todavía almacena el domicilio
+    en el formato legacy "address".
+
+    Conservamos calle + número exterior juntos
+    ahí, mientras EnviaTodo recibe ambos campos
+    por separado al cotizar.
+  */
+
+  const combinedAddress =
+    `${customerData.street} ${customerData.extNumber}`
+      .replace(
+        /\s+/g,
+        " "
+      )
+      .trim();
 
   return {
     client_request_id:
@@ -945,7 +2539,7 @@ function buildOrderRequest(
 
     shipping_address: {
       address:
-        customerData.address,
+        combinedAddress,
 
       address2:
         customerData.address2,
@@ -964,6 +2558,19 @@ function buildOrderRequest(
 
       country:
         "México"
+    },
+
+    shipping_quote: {
+      uuid:
+        activeShippingQuote.uuid,
+
+      provider_id:
+        selectedShippingRate
+          .provider_id,
+
+      provider_service_id:
+        selectedShippingRate
+          .provider_service_id
     },
 
     notes:
@@ -1026,6 +2633,32 @@ function getBackendErrorMessage(
     case "INVALID_ITEMS":
       return (
         "No fue posible validar los productos del carrito."
+      );
+
+    case "INVALID_SHIPPING_QUOTE":
+      return (
+        "La opción de envío seleccionada no es válida."
+      );
+
+    case "SHIPPING_QUOTE_NOT_FOUND":
+      return (
+        "La cotización de envío ya no está disponible. Vuelve a calcularla."
+      );
+
+    case "SHIPPING_QUOTE_EXPIRED":
+      return (
+        "La cotización de envío expiró. Vuelve a seleccionar tu envío."
+      );
+
+    case "SHIPPING_QUOTE_ADDRESS_MISMATCH":
+      return (
+        "La dirección cambió después de calcular el envío. Vuelve a cotizar."
+      );
+
+    case "ORDER_SHIPPING_QUOTE_MISMATCH":
+    case "ORDER_ALREADY_PREPARED":
+      return (
+        "Este intento de compra ya estaba asociado a otra cotización. Actualiza el checkout."
       );
 
     default:
@@ -1581,7 +3214,7 @@ function closeReadyModalWindow() {
 
 
 /* ==========================================
-   FINALIZE CONFIRMED PAYMENT IN FRONTEND
+   FINALIZE CONFIRMED PAYMENT
 ========================================== */
 
 function handleConfirmedPayment(
@@ -1599,40 +3232,20 @@ function handleConfirmedPayment(
     confirmedOrder
   );
 
-  /*
-    Primero guardamos el ID del pedido y
-    client_request_id ANTES de limpiar
-    localStorage.
-  */
-
   const confirmationSaved =
     saveConfirmedOrderForRedirect(
       confirmedOrder
     );
 
-  /*
-    Únicamente ahora vaciamos carrito,
-    borrador y request ID.
-  */
-
   clearCheckoutAfterPayment();
-
-  /*
-    Mostramos confirmación visual breve.
-  */
 
   showConfirmedPaymentModal(
     confirmedOrder
   );
 
-  /*
-    Si la información necesaria para
-    pedido-confirmado.html fue guardada,
-    redirigimos automáticamente.
-  */
-
   if (confirmationSaved) {
     redirectToConfirmationPage();
+
   } else {
     console.error(
       "DUVANT 12 — Pago confirmado, pero no se pudo preparar la redirección."
@@ -1744,21 +3357,6 @@ async function startBackgroundPaymentMonitor(
 
       await wait(
         BACKGROUND_POLL_INTERVAL
-      );
-    }
-
-    if (
-      !paymentWasConfirmed
-    ) {
-      console.warn(
-        "DUVANT 12 — Monitor de pago detenido por tiempo máximo:",
-        {
-          order_id:
-            order.id,
-
-          order_number:
-            order.order_number
-        }
       );
     }
 
@@ -1899,8 +3497,7 @@ async function processMercadoPagoPayment(
     payment_method_type:
       "credit_card",
 
-    installments:
-      installments
+    installments
   };
 
   console.log(
@@ -1912,8 +3509,7 @@ async function processMercadoPagoPayment(
       payment_method_id:
         paymentMethodId,
 
-      installments:
-        installments
+      installments
     }
   );
 
@@ -2051,8 +3647,7 @@ async function initializeMercadoPago(
   const settings = {
 
     initialization: {
-      amount:
-        amount,
+      amount,
 
       payer: {
         email:
@@ -2282,7 +3877,6 @@ async function initializeMercadoPago(
 
       onError:
         error => {
-
           console.error(
             "Mercado Pago Brick:",
             error
@@ -2318,11 +3912,6 @@ async function showPaymentStage(
   activeOrder =
     order;
 
-  /*
-    Guardamos el request ID exacto de este
-    pedido antes de cualquier limpieza.
-  */
-
   activeOrderClientRequestId =
     getCheckoutRequestId();
 
@@ -2335,6 +3924,41 @@ async function showPaymentStage(
         order.total
       )
     );
+
+  /*
+    Mostramos también los valores
+    autoritativos devueltos por create-order.
+  */
+
+  if (
+    Number.isFinite(
+      Number(
+        order.shipping_total
+      )
+    )
+  ) {
+    checkoutShippingTotal.textContent =
+      store.formatCurrency(
+        Number(
+          order.shipping_total
+        )
+      );
+  }
+
+  if (
+    Number.isFinite(
+      Number(
+        order.total
+      )
+    )
+  ) {
+    checkoutTotal.textContent =
+      store.formatCurrency(
+        Number(
+          order.total
+        )
+      );
+  }
 
   checkoutPaymentSection.hidden =
     false;
@@ -2379,9 +4003,23 @@ async function createStoreOrder(
       customerData
     );
 
+  /*
+    No imprimimos datos completos del
+    cliente ni dirección en producción.
+  */
+
   console.log(
-    "DUVANT 12 — Enviando pedido:",
-    requestBody
+    "DUVANT 12 — Preparando pedido:",
+    {
+      client_request_id:
+        requestBody.client_request_id,
+
+      shipping_quote:
+        requestBody.shipping_quote,
+
+      item_count:
+        requestBody.items.length
+    }
   );
 
   const {
@@ -2439,6 +4077,35 @@ async function createStoreOrder(
             "carrito.html";
         },
         1300
+      );
+
+      return null;
+    }
+
+    if (
+      data.error ===
+        "SHIPPING_QUOTE_NOT_FOUND" ||
+      data.error ===
+        "SHIPPING_QUOTE_EXPIRED" ||
+      data.error ===
+        "SHIPPING_QUOTE_ADDRESS_MISMATCH" ||
+      data.error ===
+        "INVALID_SHIPPING_QUOTE"
+    ) {
+      /*
+        Fuerza una nueva cotización.
+      */
+
+      invalidateShippingQuote(
+        "La cotización cambió. Calculando nuevamente..."
+      );
+
+      await requestShippingRates({
+        force: true
+      });
+
+      scrollToElement(
+        checkoutShippingSection
       );
     }
 
@@ -2517,6 +4184,54 @@ async function handleSubmit(
     return;
   }
 
+  /*
+    Primero aseguramos una cotización válida
+    y que el cliente haya seleccionado tarifa.
+  */
+
+  const shippingReady =
+    await ensureShippingSelection();
+
+  if (!shippingReady) {
+    store.showToast(
+      selectedShippingRate
+        ? "No fue posible validar el envío."
+        : "Selecciona un método de envío."
+    );
+
+    return;
+  }
+
+  /*
+    Volvemos a leer los datos después de
+    cualquier proceso asíncrono.
+  */
+
+  const finalCustomerData =
+    getFormData();
+
+  const finalFingerprint =
+    createShippingFingerprint(
+      finalCustomerData
+    );
+
+  if (
+    finalFingerprint !==
+      activeShippingFingerprint
+  ) {
+    invalidateShippingQuote(
+      "La información cambió. Vuelve a seleccionar el envío."
+    );
+
+    scheduleShippingQuote();
+
+    store.showToast(
+      "Actualizamos tu dirección. Vuelve a seleccionar el envío."
+    );
+
+    return;
+  }
+
   creatingOrder =
     true;
 
@@ -2529,7 +4244,6 @@ async function handleSubmit(
   `;
 
   try {
-
     await store.loadProducts();
 
     const refreshedItems =
@@ -2571,13 +4285,46 @@ async function handleSubmit(
       return;
     }
 
+    /*
+      loadProducts pudo modificar el carrito.
+      Si cambió, la cotización deja de ser válida.
+    */
+
+    const refreshedFingerprint =
+      createShippingFingerprint(
+        finalCustomerData
+      );
+
+    if (
+      refreshedFingerprint !==
+        activeShippingFingerprint
+    ) {
+      invalidateShippingQuote(
+        "El carrito cambió. Calculando nuevamente el envío..."
+      );
+
+      await requestShippingRates({
+        force: true
+      });
+
+      store.showToast(
+        "El carrito cambió. Selecciona nuevamente tu envío."
+      );
+
+      scrollToElement(
+        checkoutShippingSection
+      );
+
+      return;
+    }
+
     saveDraft(
-      customerData
+      finalCustomerData
     );
 
     const order =
       await createStoreOrder(
-        customerData
+        finalCustomerData
       );
 
     if (!order) {
@@ -2586,12 +4333,27 @@ async function handleSubmit(
 
     console.log(
       "DUVANT 12 — Pedido reservado:",
-      order
+      {
+        id:
+          order.id,
+
+        order_number:
+          order.order_number,
+
+        subtotal:
+          order.subtotal,
+
+        shipping_total:
+          order.shipping_total,
+
+        total:
+          order.total
+      }
     );
 
     await showPaymentStage(
       order,
-      customerData
+      finalCustomerData
     );
 
   } catch (error) {
@@ -2640,6 +4402,47 @@ function saveCurrentDraft() {
 
 
 /* ==========================================
+   ADDRESS CHANGE HANDLING
+========================================== */
+
+const SHIPPING_RELEVANT_FIELDS =
+  new Set([
+    "firstName",
+    "lastName",
+    "email",
+    "phone",
+    "street",
+    "extNumber",
+    "address2",
+    "neighborhood"
+  ]);
+
+
+function handleShippingRelevantChange(
+  fieldName
+) {
+  if (
+    !SHIPPING_RELEVANT_FIELDS.has(
+      fieldName
+    )
+  ) {
+    return;
+  }
+
+  if (
+    fieldName ===
+      "neighborhood"
+  ) {
+    scheduleShippingQuote();
+
+    return;
+  }
+
+  scheduleShippingQuote();
+}
+
+
+/* ==========================================
    CUSTOMER FORM EVENTS
 ========================================== */
 
@@ -2670,9 +4473,7 @@ checkoutForm.addEventListener(
       );
     }
 
-    if (
-      field.name
-    ) {
+    if (field.name) {
       const errorElement =
         checkoutForm.querySelector(
           `[data-error-for="${field.name}"]`
@@ -2682,6 +4483,30 @@ checkoutForm.addEventListener(
         errorElement.textContent =
           "";
       }
+    }
+
+    if (
+      field.name ===
+        "postalCode"
+    ) {
+      /*
+        Solo números y máximo 5.
+      */
+
+      field.value =
+        normalizePostalCode(
+          field.value
+        ).slice(
+          0,
+          5
+        );
+
+      schedulePostalCodeLookup();
+
+    } else {
+      handleShippingRelevantChange(
+        field.name
+      );
     }
 
     saveCurrentDraft();
@@ -2699,9 +4524,7 @@ checkoutForm.addEventListener(
     const field =
       event.target;
 
-    if (
-      field.name
-    ) {
+    if (field.name) {
       const errorElement =
         checkoutForm.querySelector(
           `[data-error-for="${field.name}"]`
@@ -2711,6 +4534,18 @@ checkoutForm.addEventListener(
         errorElement.textContent =
           "";
       }
+    }
+
+    if (
+      field.name ===
+        "postalCode"
+    ) {
+      schedulePostalCodeLookup();
+
+    } else {
+      handleShippingRelevantChange(
+        field.name
+      );
     }
 
     saveCurrentDraft();
@@ -2775,12 +4610,129 @@ window.addEventListener(
   "duvant-cart-updated",
   () => {
     if (
-      !checkoutContent.hidden
+      checkoutContent.hidden
     ) {
-      renderSummary();
+      return;
+    }
+
+    renderSummary();
+
+    if (
+      !activeOrder
+    ) {
+      invalidateShippingQuote(
+        "El carrito cambió. Calculando nuevamente el envío..."
+      );
+
+      scheduleShippingQuote();
     }
   }
 );
+
+
+/* ==========================================
+   RESET SHIPPING STATE
+========================================== */
+
+function resetShippingState() {
+  if (zipLookupTimer) {
+    window.clearTimeout(
+      zipLookupTimer
+    );
+  }
+
+  if (shippingQuoteTimer) {
+    window.clearTimeout(
+      shippingQuoteTimer
+    );
+  }
+
+  zipLookupTimer =
+    null;
+
+  shippingQuoteTimer =
+    null;
+
+  zipLookupSequence +=
+    1;
+
+  shippingQuoteSequence +=
+    1;
+
+  zipLookupIsRunning =
+    false;
+
+  shippingQuoteIsRunning =
+    false;
+
+  activeZipCode =
+    "";
+
+  activeShippingQuote =
+    null;
+
+  activeShippingFingerprint =
+    "";
+
+  selectedShippingRate =
+    null;
+
+  checkoutShippingRates.innerHTML =
+    "";
+
+  setZipStatus(
+    ""
+  );
+
+  setShippingStatus(
+    "Completa tu dirección para calcular el envío."
+  );
+
+  setShippingError(
+    ""
+  );
+
+  checkoutShippingTotal.textContent =
+    "Por calcular";
+}
+
+
+/* ==========================================
+   RESTORE DRAFT LOCATION
+========================================== */
+
+async function restoreDraftLocation(
+  draft
+) {
+  if (!draft) {
+    return;
+  }
+
+  const postalCode =
+    normalizePostalCode(
+      draft.postalCode
+    );
+
+  if (
+    postalCode.length !==
+    5
+  ) {
+    return;
+  }
+
+  postalCodeField.value =
+    postalCode;
+
+  await lookupPostalCode(
+    postalCode,
+    {
+      restoreNeighborhood:
+        sanitizeText(
+          draft.neighborhood
+        )
+    }
+  );
+}
 
 
 /* ==========================================
@@ -2807,11 +4759,7 @@ async function initializeCheckout() {
     confirmationRedirectScheduled =
       false;
 
-    /*
-      Limpiamos cualquier confirmación vieja.
-      Solamente una compra nueva confirmada
-      puede volver a crear este valor.
-    */
+    resetShippingState();
 
     sessionStorage.removeItem(
       CONFIRMED_ORDER_KEY
@@ -2872,7 +4820,8 @@ async function initializeCheckout() {
 
     renderSummary();
 
-    populateDraft();
+    const draft =
+      populateDraft();
 
     /*
       Nueva entrada al checkout =
@@ -2886,6 +4835,16 @@ async function initializeCheckout() {
 
     checkoutContent.hidden =
       false;
+
+    /*
+      Restauramos CP/colonia DESPUÉS de
+      mostrar el checkout, porque la colonia
+      depende de la API de EnviaTodo.
+    */
+
+    await restoreDraftLocation(
+      draft
+    );
 
   } catch (error) {
     console.error(
